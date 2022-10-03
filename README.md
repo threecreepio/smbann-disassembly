@@ -1,4 +1,4 @@
-# Super Mario Bros 2 ANN Disassembly
+# Super Mario Bros All Night Nippon Disassembly
 
 This disassembly is based off of Doppelganger's fantastic work with the SMB 2J diassembly: https://www.romhacking.net/documents/653/
 
