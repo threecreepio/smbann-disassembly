@@ -8,6 +8,11 @@ OperMode_Task         = $0772
 ScreenRoutineTask     = $073c
 DiskIOTask            = $07fc
 
+Sprite_Y_Position     = $0200
+Sprite_Tilenumber     = $0201
+Sprite_Attributes     = $0202
+Sprite_X_Position     = $0203
+
 VRAM_Buffer1          = $0301
 VRAM_Buffer_AddrCtrl  = $0773
 DisableScreenFlag     = $0774
@@ -39,6 +44,8 @@ SelectedPlayer      = $0753
 NumberofLives       = $075a
 DigitModifier       = $0134
 WorldNumber         = $075f
+
+ANN79C              = $079C
 
 ;sound related defines
 Squ2_NoteLenBuffer      = $0610
@@ -193,6 +200,9 @@ VictoryMusic           = %00000100
 .export PointsAddedMsg
 .export ForEachPlayerLeftMsg
 .export PrincessPeachsRoom
+.ifdef ANN
+.export ANNEndingPalette
+.else
 .export FantasyWorld9Msg
 .export SuperPlayerMsg
 .export E_CastleArea9
@@ -211,9 +221,11 @@ VictoryMusic           = %00000100
 .export L_WaterArea6
 .export L_WaterArea7
 .export L_WaterArea8
+.endif
 
 ;-------------------------------------------------------------------------------------
 
+.ifndef ANN
 PrintWorld9Msgs:
        lda OperMode              ;if in game over mode, branch
        cmp #GameOverMode         ;note this routine only runs after world 8 and replaces
@@ -235,6 +247,7 @@ W9GameOver:
     lda #$1e                  ;set VRAM pointer to print world 9 goodbye message
     sta VRAM_Buffer_AddrCtrl
     jmp NextOperTask          ;move on to next task
+.endif
 
 ScreenSubsForFinalRoom:
     lda ScreenRoutineTask
@@ -246,6 +259,9 @@ ScreenSubsForFinalRoom:
     .word DrawFinalRoom
     .word GetAreaPalette
     .word GetBackgroundColor
+.ifdef ANN
+    .word DoANNThing
+.endif
     .word RevealPrincess
 
 DrawFinalRoom:
@@ -255,6 +271,14 @@ DrawFinalRoom:
 NextScreenTask:
     inc ScreenRoutineTask
     rts
+
+.ifdef ANN
+DoANNThing:
+    lda #$1e
+    sta VRAM_Buffer_AddrCtrl
+    inc ScreenRoutineTask
+    rts
+.endif
 
 RevealPrincess:
     lda #$a2                   ;print game timer
@@ -326,7 +350,17 @@ AwardExtraLives:
     dec NumberofLives          ;count down each extra life
     lda #$01                   ;give 100,000 points to player for each one
     sta DigitModifier+1
+.ifdef ANN
+    jsr EndAreaPoints
+    lda AltMusicBuffer
+    bne @Exit
+    lda #1
+    sta AreaMusicQueue
+@Exit:
+    rts
+.else
     jmp EndAreaPoints
+.endif
 
 BlueTransPalette:
     .byte $3f, $00, $10
@@ -386,12 +420,24 @@ ELL: lda TwoBlankRows,x
      jsr EraseEndingCounters   ;init ending counters
      lda #$60
      sta MushroomRetDelay      ;wait before flashing each mushroom retainer in next sub
+.ifdef ANN
+      lda #$02
+      sta ANN79C
+.endif
      rts
     
 RunMushroomRetainers:
        jsr MushroomRetainersForW8  ;draw and flash the seven mushroom retainers
        lda AltMusicBuffer          ;if still playing victory music, branch to leave
        bne ExRMR
+.ifdef ANN
+       lda ANN79C
+       beq @Done
+       lda #1
+       sta AreaMusicQueue
+       rts
+@Done:
+.endif
        lda HardWorldFlag           ;if on world D, branch elsewhere
        bne BackToNormal
        inc OperMode_Task           ;otherwise just move onto the last task
@@ -409,9 +455,18 @@ EndingDiskRoutines:
 
 SaveFileHeader:
     .byte $0f, "SM2SAVE "
+.ifdef ANN
+    .word $d2e3
+.else
     .word $d29f
+.endif
+
     .byte $01, $00, $00
+.ifdef ANN
+    .word $d2e3
+.else
     .word $d29f
+.endif
     .byte $00
 
 UpdateGamesBeaten:
@@ -433,6 +488,11 @@ BackToNormal:
     lda #$00
     sta DiskIOTask           ;erase task numbers
     sta OperMode_Task
+.ifdef ANN
+    lda #$00
+    sta OperMode
+    jmp AttractModeSubs
+.else
     lda HardWorldFlag        ;if in world D, branch to end the game
     bne EndTheGame
     lda CompletedWorlds      ;if completed all worlds without skipping over any
@@ -449,6 +509,7 @@ GoToWorld9:
     sta NumberofLives        ;give the player one life
     sta FantasyW9MsgFlag
     jmp NextWorld            ;run world 9
+.endif
 
 FlashMRSpriteDataOfs:
     .byte $50, $b0, $e0, $68, $98, $c8
@@ -461,6 +522,13 @@ MRetainerYPos:
 
 MRetainerXPos:
     .byte $b8, $38, $48, $60, $80, $a0, $b8, $c8
+
+.ifdef ANN
+ANNMRetainerTiles:
+    .byte $7A,$80,$86,$8C,$92,$98,$9E
+ANNMRetainerAttr:
+    .byte $02,$03,$01,$02,$03,$01,$03
+.endif
 
 MushroomRetainersForW8:
     lda MushroomRetDelay        ;wait a bit unless waiting is already done
@@ -493,8 +561,10 @@ FlashMRetainers:
     sta CurrentFlashMRet       ;otherwise reset to 4
 DrawMRetainers:
     inc EndControlCntr         ;be sure to count frames
+.ifndef ANN
     lda WorldNumber
     pha                        ;save world number and initial retainer offset
+.endif
     lda MRetainerOffset
     pha
     tax                        ;use second counter as offset to one of the spr data offset lists
@@ -509,10 +579,50 @@ DrawMRetLoop:
     beq NextMRet               ;then branch to skip, do not draw that mushroom retainer
 SetupMRet:
     ldy MRSpriteDataOfs,x      ;get sprite data offset of the current mushroom retainer
+.ifndef ANN
     sty Enemy_SprDataOffset
     lda #$35
     sta $16                    ;set mushroom retainer object ID
+.endif
     lda MRetainerYPos,x
+.ifdef ANN
+    sta Sprite_Y_Position+0,y
+    sta Sprite_Y_Position+12,y
+    clc
+    adc #$8
+    sta Sprite_Y_Position+4,y
+    sta Sprite_Y_Position+16,y
+    clc
+    adc #$8
+    sta Sprite_Y_Position+8,y
+    sta Sprite_Y_Position+20,y
+    lda MRetainerXPos,x
+    sta Sprite_X_Position+0,y
+    sta Sprite_X_Position+4,y
+    sta Sprite_X_Position+8,y
+    clc
+    adc #8
+    sta Sprite_X_Position+12,y
+    sta Sprite_X_Position+16,y
+    sta Sprite_X_Position+20,y
+    lda ANNMRetainerTiles-1,x
+    sta $00
+    lda ANNMRetainerAttr-1,x
+    sta $01
+    ldx #$00
+:   lda $00
+    sta Sprite_Tilenumber,y
+    lda $01
+    sta Sprite_Attributes,y
+    iny
+    iny
+    iny
+    iny
+    inc $00
+    inx
+    cpx #$06
+    bne :-
+.else
     sta Enemy_Y_Position       ;use enemy object 0 for mushroom retainer temporarily
     lda MRetainerXPos,x
     sta Enemy_Rel_XPos
@@ -520,14 +630,17 @@ SetupMRet:
     stx WorldNumber            ;to prevent graphics handler from drawing princess instead
     stx ObjectOffset
     jsr EnemyGfxHandler        ;now draw the mushroom retainer
+.endif
 NextMRet:
     dec MRetainerOffset        ;move to next mushroom retainer using offset
     ldx MRetainerOffset
     bne DrawMRetLoop           ;if not drawn all retainers yet, loop to do so
     pla
     sta MRetainerOffset        ;reset initial offset
+.ifndef ANN
     pla
     sta WorldNumber            ;return world number to what it was to draw princess
+.endif
     lda #$30
     sta Enemy_SprDataOffset
     lda #$b8                   ;return original settings princess uses (note X position
@@ -625,6 +738,14 @@ ForEachPlayerLeftMsg:
     .byte $0e, $1b, $24, $15, $0e, $0f, $1d, $af
     .byte $00
 
+.ifdef ANN
+ANNEndingPalette:
+.byte $3F,$14,$0C
+.byte $0F,$12,$30,$36,$0F,$36
+.byte $30,$16,$0F,$36,$30,$1A
+.byte $00
+.endif
+
 PrincessPeachsRoom:
     .byte $20, $80, $60, $5e
     .byte $20, $a0, $60, $5d
@@ -636,6 +757,107 @@ PrincessPeachsRoom:
     .byte $23, $f0, $50, $55
     .byte $00
 
+.ifdef ANN
+;; unused bytes
+.byte $FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF
+.byte $FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF
+.byte $FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF
+.byte $FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF
+.byte $FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF
+.byte $FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF
+.byte $FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF
+.byte $FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF
+.byte $FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF
+.byte $FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF
+.byte $FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF
+.byte $FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF
+.byte $FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF
+.byte $FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF
+.byte $FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF
+.byte $FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF
+.byte $FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF
+.byte $FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF
+.byte $FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF
+.byte $FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF
+.byte $FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF
+.byte $FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF
+.byte $FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF
+.byte $FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF
+.byte $FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF
+.byte $FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF
+.byte $FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF
+.byte $FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF
+.byte $FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF
+.byte $FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF
+.byte $FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF
+.byte $FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF
+.byte $FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF
+.byte $FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF
+.byte $FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF
+.byte $FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF
+.byte $FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF
+.byte $FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF
+.byte $FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF
+.byte $FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF
+.byte $FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF
+.byte $FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF
+.byte $FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF
+.byte $FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF
+.byte $FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF
+.byte $FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF
+.byte $FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF
+.byte $FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF
+.byte $FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF
+.byte $FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF
+.byte $FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF
+.byte $FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF
+.byte $FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF
+.byte $FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF
+.byte $FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF
+.byte $FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF
+.byte $FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF
+.byte $FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF
+.byte $FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF
+.byte $FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF
+.byte $FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF
+.byte $FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF
+.byte $FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF
+.byte $FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF
+.byte $FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF
+.byte $FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF
+.byte $FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF
+.byte $FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF
+.byte $FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF
+.byte $FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF
+.byte $FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF
+.byte $FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF
+.byte $FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF
+.byte $FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF
+.byte $FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF
+.byte $FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF
+.byte $FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF
+.byte $FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF
+.byte $FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF
+.byte $FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF
+.byte $FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF
+.byte $FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF
+.byte $FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF
+.byte $FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF
+.byte $FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF
+.byte $FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF
+.byte $FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF
+.byte $FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF
+.byte $FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF
+.byte $FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF
+.byte $FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF
+.byte $FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF
+.byte $FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF
+.byte $FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF
+.byte $FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF
+.byte $FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF
+.byte $FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF
+.byte $FF,$FF,$FF,$FF,$FF            
+.else
 FantasyWorld9Msg:
     .byte $22, $24, $18
     .byte $20, $0e, $24, $19, $1b, $0e, $1c, $0e, $17, $1d, $24, $0f, $0a
@@ -775,7 +997,11 @@ AlternateSoundEngine:
     lsr
     sta SND_MASTERCTRL_REG
     rts
+.endif
 
+.ifdef ANN
+AlternateSoundEngine:
+.endif
 RunAltSoundRoutines:
     lda #$ff                ;disable irqs from apu and set frame counter mode
     sta JOYPAD_PORT2
@@ -1185,6 +1411,7 @@ ProcessLengthData:
     lda MusicLengthLookupTbl,y
     rts
 
+.ifndef ANN
 Dump_Squ1_Regs:
     sty SND_SQUARE1_REG+1    ;set regs for envelope on square 1 channel
     stx SND_SQUARE1_REG
@@ -1225,6 +1452,7 @@ SetFreq_FDS:
     lda FDSFreqLookupTbl+1,y
     sta FDSSND_FREQLOW
     rts
+.endif
 
 ;-------------------------------------------------------------------------------------
 
@@ -1418,3 +1646,46 @@ SweepModData2:
 MusicLengthLookupTbl:
     .byte $24, $12, $0d, $09, $1b, $28, $36, $12
     .byte $24, $12, $0d, $09, $1b, $28, $36, $6c
+
+.ifdef ANN
+Dump_Squ1_Regs:
+    sty SND_SQUARE1_REG+1    ;set regs for envelope on square 1 channel
+    stx SND_SQUARE1_REG
+    rts
+
+    jsr Dump_Squ1_Regs       ;dead code, nothing branches here
+SetFreq_Squ1:
+    ldx #$00
+Dump_Freq_Regs:
+    tay
+    lda FreqRegLookupTbl+1,y
+    beq NoTone
+    sta SND_REGISTER+2,x
+    lda FreqRegLookupTbl,y
+    ora #$08
+    sta SND_REGISTER+3,x
+NoTone:
+    rts
+
+Dump_Sq2_Regs:
+    stx SND_SQUARE2_REG       ;set regs for envelope on square 2 channel
+    sty SND_SQUARE2_REG+1
+    rts
+
+    jsr Dump_Sq2_Regs         ;dead code, nothing branches here
+SetFreq_Squ2:
+    ldx #$04                  ;set frequency regs for square 2 channel to play note
+    bne Dump_Freq_Regs
+SetFreq_Tri:
+    ldx #$08                  ;if branched here, do that for triangle channel
+    bne Dump_Freq_Regs
+SetFreq_FDS:
+    ldx #$80                  ;if branched here, start off by silencing the FDS channel
+    stx FDSSND_FREQHIGH
+    tay
+    lda FDSFreqLookupTbl,y    ;now set the frequency regs for FDS channel
+    sta FDSSND_FREQHIGH
+    lda FDSFreqLookupTbl+1,y
+    sta FDSSND_FREQLOW
+    rts
+.endif

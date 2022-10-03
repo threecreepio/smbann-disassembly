@@ -9,7 +9,7 @@ integritycheck: main.fds
 	radiff2 -x main.fds original.fds | head -n 100
 
 %.o: %.asm
-	$(AS) --create-dep "$@.dep" -g --debug-info $< -o $@
+	$(AS) -DANN --listing "$@.lst" --create-dep "$@.dep" -g --debug-info $< -o $@
 
 main.fds: layout fdswrap.o
 	$(LD) --dbgfile $@.dbg -C layout fdswrap.o -o $@
