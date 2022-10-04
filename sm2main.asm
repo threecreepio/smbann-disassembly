@@ -752,6 +752,9 @@ GameOverMode          = 3
 .import L_Area28
 .import L_Area2B
 .import L_Area2A
+.import MRetainerCHRWorld5
+.import MRetainerCHRWorld6
+.import MRetainerCHRWorld7
 .else
 .import E_CastleArea5
 .import E_CastleArea6
@@ -1295,13 +1298,13 @@ VictoryModeSubsForW8:
 
 .ifdef ANN
 MRetainerData:
-.addr World1MushroomRetainerCHR
-.addr World2MushroomRetainerCHR
-.addr World3MushroomRetainerCHR
-.addr World4MushroomRetainerCHR
-.addr World5MushroomRetainerCHR
-.addr World6MushroomRetainerCHR
-.addr World7MushroomRetainerCHR
+.addr MRetainerCHRWorld1
+.addr MRetainerCHRWorld2
+.addr MRetainerCHRWorld3
+.addr MRetainerCHRWorld4
+.addr MRetainerCHRWorld5
+.addr MRetainerCHRWorld6
+.addr MRetainerCHRWorld7
 
 ; overwrites CHR CD0-CFF, 7A0-7BF and EE0-EEF
 MRetainerPPUOffsetHi:
@@ -16261,58 +16264,49 @@ L_Area29:
 .byte $c7,$34,$d1,$51,$43,$b3,$47,$33,$9a,$30,$a9,$61,$b8,$62,$be,$0b
 .byte $c4,$31,$d5,$0a,$de,$0f,$0d,$ca,$7d,$47,$fd
 
-World1MushroomRetainerCHR:
+MRetainerCHRWorld1:
 .byte $00,$03,$1f,$3f,$3f,$7f,$7f,$7f
 .byte $00,$03,$1f,$3f,$3f,$7f,$7f,$7f
-.byte $7f
+.byte $7f,$3f,$3b,$33,$7f,$7e,$7f,$7f
+.byte $5f,$18,$0f,$3f,$70,$53,$19,$1c
+.byte $00,$00,$03,$34,$79,$7f,$3f,$1c
+.byte $3f,$3f,$0f,$0f,$07,$03,$03,$00
+.byte $e0,$f0,$f8,$f8,$fc,$fe,$fe,$fe
+.byte $e0,$f0,$f8,$f8,$fc,$fe,$fe,$fe
+.byte $fe,$fe,$ee,$e6,$ff,$3f,$ff,$ff
+.byte $8c,$04,$70,$7e,$07,$e5,$cc,$1c
+.byte $80,$00,$e0,$06,$cf,$ff,$fe,$1c
+.byte $7e,$fe,$f8,$f8,$f0,$e0,$e0,$00
 
-World5MushroomRetainerCHR:
-.byte $3f,$3b,$33,$7f,$7e,$7f,$7f,$5f
-.byte $18,$0f,$3f,$70,$53,$19,$1c,$00
-.byte $00,$03,$34,$79,$7f,$3f,$1c,$3f
-.byte $3f,$0f,$0f,$07,$03,$03,$00,$e0
-.byte $f0,$f8,$f8,$fc,$fe,$fe,$fe,$e0
-.byte $f0,$f8,$f8,$fc,$fe,$fe,$fe,$fe
-.byte $fe,$ee,$e6,$ff,$3f,$ff,$ff,$8c
-.byte $04,$70,$7e,$07,$e5,$cc,$1c,$80
-.byte $00,$e0,$06,$cf,$ff,$fe,$1c,$7e
-.byte $fe,$f8,$f8,$f0,$e0,$e0,$00
-
-World2MushroomRetainerCHR:
+MRetainerCHRWorld2:
 .byte $1f,$3f,$3f,$1f,$1f,$1f,$1f,$1f
 .byte $1f,$3f,$30,$04,$03,$02,$00,$00
-.byte $1f
+.byte $1f,$1f,$1f,$1f,$1e,$0f,$0f,$07
+.byte $00,$01,$00,$01,$00,$01,$00,$00
+.byte $74,$42,$e3,$e1,$00,$60,$38,$0c
+.byte $0e,$03,$03,$01,$0f,$e8,$78,$3c
+.byte $00,$f8,$fc,$fc,$fc,$fc,$fc,$fc
+.byte $00,$f8,$1c,$4c,$8c,$84,$04,$04
+.byte $f8,$f8,$f8,$f8,$f8,$f0,$f0,$e0
+.byte $00,$00,$00,$00,$00,$00,$00,$00
+.byte $2e,$62,$c7,$c7,$00,$18,$0c,$06
+.byte $70,$e0,$c0,$c0,$c0,$dc,$fe,$07
 
-World6MushroomRetainerCHR:
-.byte $1f,$1f,$1f,$1e,$0f,$0f,$07,$00
-.byte $01,$00,$01,$00,$01,$00,$00,$74
-.byte $42,$e3,$e1,$00,$60,$38,$0c,$0e
-.byte $03,$03,$01,$0f,$e8,$78,$3c,$00
-.byte $f8,$fc,$fc,$fc,$fc,$fc,$fc,$00
-.byte $f8,$1c,$4c,$8c,$84,$04,$04,$f8
-.byte $f8,$f8,$f8,$f8,$f0,$f0,$e0,$00
-.byte $00,$00,$00,$00,$00,$00,$00,$2e
-.byte $62,$c7,$c7,$00,$18,$0c,$06,$70
-.byte $e0,$c0,$c0,$c0,$dc,$fe,$07
-
-World3MushroomRetainerCHR:
+MRetainerCHRWorld3:
 .byte $00,$0e,$3f,$7f,$7f,$ff,$ff,$ff
 .byte $00,$0e,$3f,$7f,$7e,$fc,$f0,$ec
-.byte $7f
+.byte $7f,$7f,$7f,$7f,$3c,$1f,$47,$c1
+.byte $50,$4e,$00,$00,$0f,$00,$00,$00
+.byte $e1,$35,$06,$07,$63,$70,$30,$10
+.byte $02,$0f,$0f,$07,$e3,$f7,$fc,$70
+.byte $00,$70,$fc,$fe,$fe,$ff,$ff,$ff
+.byte $00,$70,$fc,$fe,$7e,$3f,$0f,$37
+.byte $fe,$fe,$fe,$fe,$3c,$f8,$e2,$83
+.byte $0a,$72,$00,$00,$f0,$00,$00,$00
+.byte $87,$ac,$60,$e0,$60,$0e,$0c,$08
+.byte $40,$f0,$f0,$e0,$c7,$ef,$3f,$0e
 
-World7MushroomRetainerCHR:
-.byte $7f,$7f,$7f,$3c,$1f,$47,$c1,$50
-.byte $4e,$00,$00,$0f,$00,$00,$00,$e1
-.byte $35,$06,$07,$63,$70,$30,$10,$02
-.byte $0f,$0f,$07,$e3,$f7,$fc,$70,$00
-.byte $70,$fc,$fe,$fe,$ff,$ff,$ff,$00
-.byte $70,$fc,$fe,$7e,$3f,$0f,$37,$fe
-.byte $fe,$fe,$fe,$3c,$f8,$e2,$83,$0a
-.byte $72,$00,$00,$f0,$00,$00,$00,$87
-.byte $ac,$60,$e0,$60,$0e,$0c,$08,$40
-.byte $f0,$f0,$e0,$c7,$ef,$3f,$0e
-
-World4MushroomRetainerCHR:
+MRetainerCHRWorld4:
 .byte $0f,$3f,$7f,$7f,$ff,$ff,$ff,$ff
 .byte $0f,$3f,$7f,$7f,$fe,$fc,$ee,$e0
 .byte $e1,$f1,$7f,$1f,$0c,$66,$73,$21

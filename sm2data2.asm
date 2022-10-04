@@ -85,9 +85,9 @@ MetatileBuffer        = $06a1
 .export L_Area28
 .export L_Area2B
 .export L_Area2A
-.export L_D14F
-.export L_D157
-.export L_D1B6
+.export MRetainerCHRWorld5
+.export MRetainerCHRWorld6
+.export MRetainerCHRWorld7
 .else
 .export E_CastleArea5
 .export E_CastleArea6
@@ -663,32 +663,50 @@ L_Area2A:
 .byte $07,$0F,$0E,$02,$39,$73,$05,$8B,$2E,$0B,$B7,$0B,$64,$8B,$6E,$02
 .byte $CE,$06,$DE,$0F,$E6,$0A,$7D,$C7,$FD
 
-L_D14F:
+MRetainerCHRWorld5:
 .byte $0F,$3F,$7F,$7F,$F3,$ED,$FF,$FD
+.byte $0F,$3F,$78,$60,$C0,$C0,$80,$00
+.byte $FF,$FB,$7C,$FF,$70,$7F,$FF,$FF
+.byte $00,$00,$00,$80,$43,$40,$E0,$F8
+.byte $FC,$FE,$7F,$10,$00,$00,$00,$FC
+.byte $FF,$FF,$63,$0F,$3F,$7C,$78,$FC
+.byte $F0,$FC,$FE,$FE,$CF,$B7,$FF,$BF
+.byte $F0,$FC,$1E,$06,$03,$03,$01,$00
+.byte $FF,$DF,$3E,$FF,$0E,$FE,$FF,$FF
+.byte $00,$00,$00,$01,$42,$02,$07,$1F
+.byte $3F,$7F,$FE,$08,$00,$00,$00,$3F
+.byte $FF,$FF,$C6,$F0,$FC,$3E,$1E,$3F
 
-L_D157:
-.byte $0F,$3F,$78,$60,$C0,$C0,$80,$00,$FF,$FB,$7C,$FF,$70,$7F,$FF,$FF
-.byte $00,$00,$00,$80,$43,$40,$E0,$F8,$FC,$FE,$7F,$10,$00,$00,$00,$FC
-.byte $FF,$FF,$63,$0F,$3F,$7C,$78,$FC,$F0,$FC,$FE,$FE,$CF,$B7,$FF,$BF
-.byte $F0,$FC,$1E,$06,$03,$03,$01,$00,$FF,$DF,$3E,$FF,$0E,$FE,$FF,$FF
-.byte $00,$00,$00,$01,$42,$02,$07,$1F,$3F,$7F,$FE,$08,$00,$00,$00,$3F
-.byte $FF,$FF,$C6,$F0,$FC,$3E,$1E,$3F,$03,$07,$1F,$7F,$7F,$FF,$FD
+MRetainerCHRWorld6:
+.byte $03,$07,$1F,$7F,$7F,$FF,$FD,$FF
+.byte $03,$07,$1F,$7F,$7F,$FF,$FC,$F8
+.byte $71,$39,$0F,$0F,$1F,$1F,$1E,$3F
+.byte $4A,$03,$01,$01,$11,$10,$18,$39
+.byte $3B,$3F,$3C,$3C,$18,$00,$00,$3F
+.byte $24,$03,$03,$02,$07,$07,$07,$3F
+.byte $C0,$F0,$F0,$FC,$FE,$FF,$8F,$FF
+.byte $C0,$F0,$F0,$FC,$9E,$17,$07,$01
+.byte $8E,$9E,$F8,$F8,$FE,$FE,$3F,$F7
+.byte $50,$40,$00,$00,$86,$07,$0F,$CF
+.byte $F7,$F7,$02,$00,$1C,$3E,$3E,$1C
+.byte $1B,$FB,$FC,$DC,$FC,$3E,$3E,$1C
 
-L_D1B6:
-.byte $FF,$03,$07,$1F,$7F,$7F,$FF,$FC,$F8,$71,$39,$0F,$0F,$1F,$1F,$1E
-.byte $3F,$4A,$03,$01,$01,$11,$10,$18,$39,$3B,$3F,$3C,$3C,$18,$00,$00
-.byte $3F,$24,$03,$03,$02,$07,$07,$07,$3F,$C0,$F0,$F0,$FC,$FE,$FF,$8F
-.byte $FF,$C0,$F0,$F0,$FC,$9E,$17,$07,$01,$8E,$9E,$F8,$F8,$FE,$FE,$3F
-.byte $F7,$50,$40,$00,$00,$86,$07,$0F,$CF,$F7,$F7,$02,$00,$1C,$3E,$3E
-.byte $1C,$1B,$FB,$FC,$DC,$FC,$3E,$3E,$1C,$1F,$7F,$70,$C1,$C1,$95,$A3
-.byte $CB,$1F,$7F,$7F,$FE,$FE,$EA,$C4,$08,$F3,$FD
+MRetainerCHRWorld7:
+.byte $1F,$7F,$70,$C1,$C1,$95,$A3,$CB
+.byte $1F,$7F,$7F,$FE,$FE,$EA,$C4,$08
+.byte $F3,$FD,$FC,$3F,$38,$1C,$1F,$17
+.byte $00,$02,$03,$00,$00,$63,$70,$F8
+.byte $10,$38,$7F,$7F,$3F,$7F,$78,$00
+.byte $FF,$DF,$9F,$3B,$3F,$7F,$78,$F8
+.byte $F0,$FC,$1C,$06,$06,$82,$82,$46
+.byte $F0,$FC,$FC,$FE,$FE,$7E,$1E,$48
+.byte $3E,$FE,$7E,$F8,$38,$70,$E0,$D6
+.byte $00,$00,$80,$00,$00,$88,$1C,$38
+.byte $1F,$3F,$FF,$FE,$F8,$FC,$3E,$00
+.byte $F0,$F0,$F0,$B8,$F8,$FC,$3E,$3F
 
-; junk?
-.byte $FC,$3F,$38,$1C,$1F,$17,$00,$02,$03,$00,$00,$63,$70,$F8,$10,$38
-.byte $7F,$7F,$3F,$7F,$78,$00,$FF,$DF,$9F,$3B,$3F,$7F,$78,$F8,$F0,$FC
-.byte $1C,$06,$06,$82,$82,$46,$F0,$FC,$FC,$FE,$FE,$7E,$1E,$48,$3E,$FE
-.byte $7E,$F8,$38,$70,$E0,$D6,$00,$00,$80,$00,$00,$88,$1C,$38,$1F,$3F
-.byte $FF,$FE,$F8,$FC,$3E,$00,$F0,$F0,$F0,$B8,$F8,$FC,$3E,$3F,$FF
+;unused byte
+.byte $FF
 
 .else
 ;level 5-4
