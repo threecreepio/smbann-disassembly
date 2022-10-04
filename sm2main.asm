@@ -710,51 +710,48 @@ GameOverMode          = 3
 .import SuperPlayerMsg
 ;from sm2data2
 .ifdef ANN
-.import E_C5D0
-.import E_C605
-.import E_C62C
-.import E_C641
-.import E_C681
-.import E_C69E
-.import E_C6C5
-.import E_C6E8
-.import E_C705
-.import E_C729
-.import E_C72F
-.import E_C752
-.import E_C75B
-.import E_C795
-.import E_C7C0
-.import E_C7F0
-.import E_C80C
-.import E_C812
-.import E_C82B
-.import E_C83C
-.import E_C86A
-.import L_C878
-.import L_C8ED
-.import L_C97A
-.import L_CA05
-.import L_CAD8
-.import L_CB45
-.import L_CBD6
-.import L_CC1F
-.import L_CC8C
-.import L_CCCD
-.import L_CCE2
-.import L_CD49
-.import L_CDBE
-.import L_CE53
-.import L_CECA
-.import L_CF47
-.import L_CFA8
-.import L_CFD3
-.import L_D02C
-.import L_D06D
-.import L_D136
-.import L_D14F
-.import L_D157
-.import L_D1B6
+.import E_Area06
+.import E_Area07
+.import E_Area04
+.import E_Area05
+.import E_Area09
+.import E_Area0B
+.import E_Area1E
+.import E_Area1F
+.import E_Area12
+.import E_Area21
+.import E_Area15
+.import E_Area16
+.import E_Area18
+.import E_Area19
+.import E_Area1A
+.import E_Area1B
+.import E_Area22
+.import E_Area27
+.import E_Area28
+.import E_Area2B
+.import E_Area2A
+.import L_Area06
+.import L_Area07
+.import L_Area04
+.import L_Area05
+.import L_Area09
+.import L_Area0B
+.import L_Area1E
+.import L_Area1F
+.import L_Area12
+.import L_Area21
+.import L_Area15
+.import L_Area16
+.import L_Area18
+.import L_Area19
+.import L_Area1A
+.import L_Area1B
+.import L_Area22
+.import L_Area27
+.import L_Area28
+.import L_Area2B
+.import L_Area2A
 .else
 .import E_CastleArea5
 .import E_CastleArea6
@@ -798,7 +795,6 @@ GameOverMode          = 3
 .import L_WaterArea2
 .import L_WaterArea4
 .import L_WaterArea5
-.endif
 ;from sm2data3
 .import E_CastleArea9
 .import E_CastleArea10
@@ -816,6 +812,7 @@ GameOverMode          = 3
 .import L_WaterArea6
 .import L_WaterArea7
 .import L_WaterArea8
+.endif
 
 ; exports to other files
 .export SoundEngineJSRCode
@@ -849,10 +846,17 @@ GameOverMode          = 3
 .export RenderUnderPart
 .export MetatileBuffer
 .export GetAreaType
+.ifndef ANN
 .export E_GroundArea21
 .export E_GroundArea28
 .export L_GroundArea10
 .export L_GroundArea28
+.else
+.export E_HArea10
+.export E_HArea11
+.export L_HArea10
+.export L_HArea11
+.endif
 
 ;-------------------------------------------------------------------------------------
 
@@ -15483,19 +15487,21 @@ L_GroundArea21:
   .byte $53, $13, $62, $41, $97, $17, $a6, $45, $6e, $81, $8f, $37, $02, $e8, $12, $3a
   .byte $68, $7a, $de, $0f, $6d, $c5, $fd
 .else
-E_C26F:
-E_GroundArea21:
-E_GroundArea28:
+E_Area11:
+E_Area20:
+E_Area2C:
+E_HArea10:
+E_HArea11:
 .byte $FF
 
-L_C270:
-L_GroundArea28:
+L_Area11:
+L_HArea10:
 .byte $38,$11,$0F,$26,$AD,$40,$3D,$C7,$FD
 
-L_C279:
-L_GroundArea10:
+L_Area20:
+L_HArea11:
 .byte $90,$31,$39,$F1,$5F,$38,$6D,$C1,$AF,$26,$8D,$C7
-L_C285:
+L_Area2C:
 .byte $FD
 .endif
 
@@ -15651,51 +15657,12 @@ EnemyAddrHOffsets:
 
 EnemyDataAddrs:
 .ifdef ANN
-.addr E_C745 ; 00
-.addr E_C762 ; 01
-.addr E_C77B ; 02
-.addr E_C79E ; 03
-.addr E_C62C ; 04 (sm2data2)
-.addr E_C641 ; 05 (sm2data2)
-.addr E_C5D0 ; 06 (sm2data2)
-.addr E_C605 ; 07 (sm2data2)
-.addr E_C7C7 ; 08
-.addr E_C681 ; 09 (sm2data2)
-.addr E_C7E8 ; 10
-.addr E_C69E ; 11 (sm2data2)
-.addr E_C7F8 ; 12
-.addr E_C829 ; 13
-.addr E_C847 ; 14
-.addr E_C860 ; 15
-.addr E_C867 ; 16
-.addr E_C26F ; 17
-.addr E_C705 ; 18 (sm2data2)
-.addr E_C896 ; 19
-.addr E_C89C ; 20
-.addr E_C72F ; 21 (sm2data2)
-.addr E_C752 ; 22 (sm2data2)
-.addr E_C8C0 ; 23 (sm2data2)
-.addr E_C75B ; 24 (sm2data2)
-.addr E_C795 ; 25 (sm2data2)
-.addr E_C7C0 ; 26 (sm2data2)
-.addr E_C7F0 ; 27 (sm2data2)
-.addr E_C8C1 ; 28
-.addr E_C8C7 ; 29
-.addr E_C6C5 ; 30 (sm2data2)
-.addr E_C6E8 ; 31 (sm2data2)
-.addr E_C26F ; 32
-.addr E_C729 ; 33 (sm2data2)
-.addr E_C80C ; 34 (sm2data2)
-.addr E_C8EB ; 35 (sm2data2)
-.addr E_C8EC ; 36
-.addr E_C919 ; 37
-.addr E_C947 ; 38
-.addr E_C812 ; 39 (sm2data2)
-.addr E_C82B ; 40 (sm2data2)
-.addr E_C962 ; 41
-.addr E_C86A ; 42 (sm2data2)
-.addr E_C83C ; 43 (sm2data2)
-.addr E_C26F ; 44
+.addr E_Area00, E_Area01, E_Area02, E_Area03, E_Area04, E_Area05, E_Area06, E_Area07
+.addr E_Area08, E_Area09, E_Area0A, E_Area0B, E_Area0C, E_Area0D, E_Area0E, E_Area0F
+.addr E_Area10, E_Area11, E_Area12, E_Area13, E_Area14, E_Area15, E_Area16, E_Area17
+.addr E_Area18, E_Area19, E_Area1A, E_Area1B, E_Area1C, E_Area1D, E_Area1E, E_Area1F
+.addr E_Area20, E_Area21, E_Area22, E_Area23, E_Area24, E_Area25, E_Area26, E_Area27
+.addr E_Area28, E_Area29, E_Area2A, E_Area2B, E_Area11
 .else
   .word E_CastleArea1, E_CastleArea2, E_CastleArea3, E_CastleArea4, E_CastleArea5, E_CastleArea6
   .word E_CastleArea7, E_CastleArea8, E_CastleArea9, E_CastleArea10, E_GroundArea1, E_GroundArea2
@@ -15717,51 +15684,12 @@ AreaDataHOffsets:
 
 AreaDataAddrs:
 .ifdef ANN
-.addr L_C97B ; 00
-.addr L_C9D2 ; 01
-.addr L_CA53 ; 02
-.addr L_CAC2 ; 03
-.addr L_C97A ; 04 (sm2data2)
-.addr L_CA05 ; 05 (sm2data2)
-.addr L_C878 ; 06 (sm2data2)
-.addr L_C8ED ; 07 (sm2data2)
-.addr L_CB2D ; 08
-.addr L_CAD8 ; 09 (sm2data2)
-.addr L_CB8A ; 10
-.addr L_CB45 ; 11 (sm2data2)
-.addr L_CBDD ; 12
-.addr L_CC4E ; 13
-.addr L_CCB3 ; 14
-.addr L_CD08 ; 15
-.addr L_CD85 ; 16
-.addr L_C270 ; 17
-.addr L_CC8C ; 18 (sm2data2)
-.addr L_CDE8 ; 19
-.addr L_CDFD ; 20
-.addr L_CCE2 ; 21 (sm2data2)
-.addr L_CD49 ; 22 (sm2data2)
-.addr L_CE54 ; 23 (sm2data2)
-.addr L_CDBE ; 24 (sm2data2)
-.addr L_CE53 ; 25 (sm2data2)
-.addr L_CECA ; 26 (sm2data2)
-.addr L_CF47 ; 27 (sm2data2)
-.addr L_CE85 ; 28
-.addr L_CEB0 ; 29
-.addr L_CBD6 ; 30 (sm2data2)
-.addr L_CC1F ; 31 (sm2data2)
-.addr L_C279 ; 32
-.addr L_CCCD ; 33 (sm2data2)
-.addr L_CFA8 ; 34 (sm2data2)
-.addr L_CEE7 ; 35
-.addr L_CEF0 ; 36
-.addr L_CF91 ; 37
-.addr L_D036 ; 38
-.addr L_CFD3 ; 39 (sm2data2)
-.addr L_D02C ; 40 (sm2data2)
-.addr L_D0C3 ; 41
-.addr L_D136 ; 42 (sm2data2)
-.addr L_D06D ; 43 (sm2data2)
-.addr L_C285 ; 44
+.addr L_Area00, L_Area01, L_Area02, L_Area03, L_Area04, L_Area05, L_Area06, L_Area07
+.addr L_Area08, L_Area09, L_Area0A, L_Area0B, L_Area0C, L_Area0D, L_Area0E, L_Area0F
+.addr L_Area10, L_Area11, L_Area12, L_Area13, L_Area14, L_Area15, L_Area16, L_Area17
+.addr L_Area18, L_Area19, L_Area1A, L_Area1B, L_Area1C, L_Area1D, L_Area1E, L_Area1F
+.addr L_Area20, L_Area21, L_Area22, L_Area23, L_Area24, L_Area25, L_Area26, L_Area27
+.addr L_Area28, L_Area29, L_Area2A, L_Area2B, L_Area2C
 .else
   .word L_CastleArea1, L_CastleArea2, L_CastleArea3, L_CastleArea4, L_CastleArea5, L_CastleArea6
   .word L_CastleArea7, L_CastleArea8, L_CastleArea9, L_CastleArea10, L_GroundArea1, L_GroundArea2
@@ -16108,81 +16036,81 @@ TitleScreenGfxData:
 
 ;GAME LEVELS DATA
 .ifdef ANN
-E_C745:
+E_Area00:
 .byte $ea,$9d,$0f,$03,$16,$1d,$c6,$1d,$36,$9d,$c9,$1d,$49,$9d,$84,$1b
 .byte $c9,$1d,$88,$95,$0f,$08,$78,$2d,$a6,$28,$90,$b5,$ff
-E_C762:
+E_Area01:
 .byte $0f,$03,$56,$1b,$c9,$1b,$0f,$07,$36,$1b,$aa,$1b,$48,$95,$0f,$0a
 .byte $2a,$1b,$5b,$0c,$78,$2d,$90,$b5,$ff
-E_C77B:
+E_Area02:
 .byte $0b,$8c,$77,$1b,$eb,$0c,$0f,$03,$19,$1d,$75,$1d,$d9,$1d,$99,$9d
 .byte $26,$9d,$5a,$2b,$8a,$2c,$ca,$1b,$20,$95,$0f,$08,$78,$2d,$a6,$28
 .byte $90,$b5,$ff
-E_C79E:
+E_Area03:
 .byte $0b,$8c,$3b,$1d,$8b,$1d,$ab,$0c,$db,$1d,$b5,$9b,$65,$9d,$6b,$1b
 .byte $0b,$9b,$05,$9d,$0b,$1b,$8b,$0c,$1b,$8c,$70,$15,$7b,$0c,$db,$0c
 .byte $0f,$08,$78,$2d,$a6,$28,$90,$b5,$ff
-E_C7C7:
+E_Area08:
 .byte $a5,$86,$e4,$28,$18,$a8,$45,$83,$69,$03,$c6,$29,$9b,$83,$16,$a9
 .byte $88,$29,$7b,$a8,$24,$8f,$c8,$03,$e8,$03,$46,$a8,$85,$24,$c8,$24
 .byte $ff
-E_C7E8:
+E_Area0A:
 .byte $2e,$c2,$66,$e2,$11,$0f,$07,$02,$11,$0f,$0c,$12,$11,$18,$10,$ff
-E_C7F8:
+E_Area0C:
 .byte $9b,$8e,$ca,$0e,$ee,$42,$44,$5b,$86,$80,$b8,$1b,$80,$50,$ba,$10
 .byte $b7,$5b,$00,$17,$85,$4b,$05,$fe,$34,$40,$b7,$86,$c6,$06,$5b,$80
 .byte $83,$00,$d0,$38,$5b,$8e,$8a,$0e,$a6,$00,$bb,$0e,$c5,$80,$f3,$00
 .byte $ff
-E_C829:
+E_Area0D:
 .byte $1e,$c2,$00,$6b,$06,$8b,$86,$63,$b7,$0f,$05,$03,$06,$23,$06,$4b
 .byte $b7,$bb,$00,$5b,$b7,$fb,$37,$3b,$b7,$0f,$0b,$1b,$37,$ff
-E_C847:
+E_Area0E:
 .byte $e3,$83,$c2,$86,$e2,$06,$76,$a5,$a3,$8f,$03,$86,$68,$28,$e9,$28
 .byte $e5,$83,$24,$8f,$36,$a8,$5b,$03,$ff
-E_C860:
+E_Area0F:
 .byte $b8,$80,$0f,$03,$08,$0e,$ff
-E_C867:
+E_Area10:
 .byte $85,$86,$0b,$80,$1b,$00,$db,$37,$77,$80,$eb,$37,$fe,$2b,$20,$2b
 .byte $80,$7b,$38,$ab,$b8,$77,$86,$fe,$42,$20,$49,$86,$8b,$06,$53,$8f
 .byte $9b,$03,$07,$90,$5b,$03,$5b,$b7,$9b,$0e,$bb,$0e,$9b,$80,$ff
-E_C896:
+E_Area13:
 .byte $0a,$aa,$0e,$28,$2a,$ff
-E_C89C:
+E_Area14:
 .byte $c7,$83,$d7,$03,$42,$8f,$7a,$03,$05,$a4,$78,$24,$a6,$25,$e4,$25
 .byte $4b,$83,$e3,$03,$06,$a9,$89,$29,$b6,$29,$09,$a9,$66,$29,$c9,$29
 .byte $0f,$08,$85,$25
-E_C8C0:
+E_Area17:
 .byte $ff
-E_C8C1:
+E_Area1C:
 .byte $0a,$aa,$0e,$24,$4a,$ff
-E_C8C7:
+E_Area1D:
 .byte $1b,$80,$bb,$38,$4b,$bc,$eb,$3b,$0f,$04,$2b,$00,$ab,$38,$eb,$00
 .byte $cb,$8e,$fb,$80,$9b,$b8,$6b,$80,$fb,$3c,$9b,$bb,$5b,$bc,$fb,$00
 .byte $6b,$b8,$fb,$38
-E_C8EB:
+E_Area23:
 .byte $ff
-E_C8EC:
+E_Area24:
 .byte $0b,$86,$1a,$06,$db,$06,$de,$c2,$02,$f0,$3b,$bb,$80,$eb,$06,$0b
 .byte $86,$93,$06,$f0,$39,$0f,$06,$60,$b8,$1b,$86,$a0,$b9,$b7,$27,$bd
 .byte $27,$2b,$83,$a1,$26,$a9,$26,$ee,$25,$0b,$27,$b4,$ff
-E_C919:
+E_Area25:
 .byte $f7,$80,$1e,$af,$60,$e0,$3a,$a5,$a7,$db,$80,$3b,$82,$8b,$02,$fe
 .byte $42,$68,$70,$bb,$25,$a7,$2c,$27,$b2,$26,$b9,$26,$9b,$80,$a8,$82
 .byte $b5,$27,$bc,$27,$bb,$83,$3b,$82,$87,$34,$ee,$38,$61,$ff
-E_C947:
+E_Area26:
 .byte $1e,$a5,$0a,$2e,$28,$27,$0f,$03,$1e,$40,$07,$0f,$05,$1e,$24,$44
 .byte $0f,$07,$1e,$22,$6a,$0f,$09,$1e,$41,$68,$ff
-E_C962:
+E_Area29:
 .byte $2e,$b8,$21,$2e,$38,$41,$6b,$07,$97,$47,$e9,$87,$7a,$87,$0f,$05
 .byte $78,$07,$38,$87,$e3,$07,$9b,$87,$ff
-L_C97B:
+L_Area00:
 .byte $9b,$07,$05,$32,$06,$33,$07,$34,$ce,$03,$dc,$51,$ee,$07,$7e,$86
 .byte $9e,$0a,$ce,$06,$e4,$00,$e8,$0b,$fe,$0a,$2e,$89,$4e,$0b,$14,$8b
 .byte $c4,$0b,$34,$8b,$7e,$06,$c7,$0b,$47,$8b,$81,$60,$82,$0b,$c7,$0b
 .byte $0e,$87,$7e,$02,$a7,$02,$b3,$02,$d7,$02,$e3,$02,$07,$82,$13,$02
 .byte $3e,$06,$7e,$02,$ae,$07,$fe,$0a,$0d,$c4,$cd,$43,$ce,$09,$de,$0b
 .byte $dd,$42,$fe,$02,$5d,$c7,$fd
-L_C9D2:
+L_Area01:
 .byte $5b,$07,$05,$32,$06,$33,$07,$34,$5e,$0a,$68,$64,$98,$64,$a8,$64
 .byte $ce,$06,$fe,$02,$0d,$01,$1e,$0e,$7e,$02,$94,$63,$b4,$63,$d4,$63
 .byte $f4,$63,$14,$e3,$2e,$0e,$5e,$02,$64,$35,$88,$72,$be,$0e,$0d,$04
@@ -16192,7 +16120,7 @@ L_C9D2:
 .byte $08,$3f,$cd,$4b,$04,$e3,$0e,$03,$2e,$01,$7e,$06,$be,$02,$de,$06
 .byte $fe,$0a,$0d,$c4,$cd,$43,$ce,$09,$de,$0b,$dd,$42,$fe,$02,$5d,$c7
 .byte $fd
-L_CA53:
+L_Area02:
 .byte $9b,$07,$05,$32,$06,$33,$07,$34,$fe,$00,$27,$b1,$65,$32,$75,$0b
 .byte $71,$00,$b7,$31,$08,$e4,$18,$64,$1e,$04,$57,$3b,$17,$8b,$27,$3a
 .byte $73,$0b,$d7,$0b,$e7,$3a,$97,$8b,$fe,$08,$24,$8b,$2e,$00,$3e,$40
@@ -16200,7 +16128,7 @@ L_CA53:
 .byte $2e,$81,$66,$42,$6a,$42,$79,$08,$be,$00,$c8,$64,$f8,$64,$08,$e4
 .byte $2e,$07,$7e,$03,$9e,$07,$be,$03,$de,$07,$fe,$0a,$03,$88,$0d,$44
 .byte $13,$24,$cd,$43,$ce,$09,$dd,$42,$de,$0b,$fe,$02,$5d,$c7,$fd
-L_CAC2:
+L_Area03:
 .byte $9b,$07,$05,$32,$06,$33,$07,$34,$fe,$06,$0c,$81,$39,$0b,$5c,$01
 .byte $89,$0b,$ac,$01,$d9,$0b,$fc,$01,$2e,$83,$a6,$42,$a7,$01,$b3,$0b
 .byte $b7,$00,$c7,$01,$de,$0a,$fe,$02,$4e,$83,$5a,$32,$63,$0b,$69,$0b
@@ -16208,21 +16136,21 @@ L_CAC2:
 .byte $09,$0b,$14,$42,$1e,$02,$7e,$0a,$9e,$07,$fe,$0a,$2e,$86,$5e,$0a
 .byte $8e,$06,$be,$0a,$ee,$07,$fe,$8a,$0d,$c4,$41,$52,$51,$52,$cd,$43
 .byte $ce,$09,$de,$0b,$dd,$42,$fe,$02,$5d,$c7,$fd
-L_CB2D:
+L_Area08:
 .byte $94,$11,$0f,$26,$fe,$10,$28,$94,$65,$15,$eb,$12,$fa,$41,$4a,$96
 .byte $54,$40,$a4,$42,$b7,$13,$e9,$19,$f5,$15,$11,$80,$47,$42,$71,$13
 .byte $15,$92,$1b,$1f,$24,$40,$55,$12,$64,$40,$95,$12,$a4,$40,$d2,$12
 .byte $e1,$40,$13,$c0,$49,$13,$83,$40,$a3,$40,$17,$92,$83,$13,$92,$41
 .byte $b9,$14,$c5,$12,$c8,$40,$d4,$40,$4b,$92,$78,$1b,$9c,$94,$9f,$11
 .byte $df,$14,$fe,$11,$7d,$c1,$9e,$42,$cf,$20,$9d,$c7,$fd
-L_CB8A:
+L_Area0A:
 .byte $52,$21,$0f,$20,$6e,$40,$58,$f2,$93,$00,$97,$01,$0c,$81,$97,$40
 .byte $a6,$41,$c7,$40,$0d,$04,$03,$01,$07,$01,$23,$01,$27,$01,$ec,$03
 .byte $ac,$f3,$c3,$03,$78,$e2,$94,$43,$47,$f3,$74,$43,$47,$fb,$74,$43
 .byte $2c,$f1,$4c,$63,$47,$00,$57,$21,$5c,$01,$7c,$72,$39,$f1,$ec,$02
 .byte $4c,$81,$ec,$01,$0d,$0d,$0f,$38,$c7,$08,$ed,$4a,$1d,$c1,$5f,$26
 .byte $3d,$c7,$fd
-L_CBDD:
+L_Area0C:
 .byte $52,$31,$0f,$20,$6e,$66,$07,$81,$36,$01,$66,$00,$a7,$21,$c7,$08
 .byte $c9,$20,$ec,$01,$08,$f2,$67,$7b,$98,$f2,$39,$f1,$9f,$33,$dc,$27
 .byte $dc,$57,$23,$83,$57,$63,$6c,$51,$87,$63,$99,$61,$a3,$07,$b3,$21
@@ -16231,7 +16159,7 @@ L_CBDD:
 .byte $87,$20,$b3,$22,$b7,$20,$c3,$00,$c7,$01,$d7,$20,$67,$a0,$77,$08
 .byte $87,$22,$e8,$62,$f5,$65,$1c,$82,$7f,$38,$8d,$c1,$cf,$26,$ad,$c7
 .byte $fd
-L_CC4E:
+L_Area0D:
 .byte $54,$21,$07,$81,$47,$24,$57,$01,$63,$00,$77,$01,$c9,$71,$68,$f2
 .byte $e7,$73,$97,$fb,$06,$83,$5c,$01,$d7,$22,$03,$80,$13,$26,$6c,$02
 .byte $b3,$22,$e3,$01,$e7,$08,$47,$a1,$a7,$01,$d3,$07,$d7,$01,$07,$80
@@ -16239,14 +16167,14 @@ L_CC4E:
 .byte $e9,$61,$fa,$60,$4f,$b3,$87,$63,$9c,$01,$b7,$63,$c8,$62,$d9,$61
 .byte $ea,$60,$39,$f1,$87,$21,$a7,$01,$b7,$20,$39,$f1,$5f,$38,$6d,$c1
 .byte $af,$26,$8d,$c7,$fd
-L_CCB3:
+L_Area0E:
 .byte $94,$11,$0f,$26,$fe,$10,$2a,$93,$87,$17,$a3,$14,$b2,$42,$0a,$92
 .byte $36,$14,$50,$41,$82,$16,$2b,$93,$24,$41,$bb,$14,$b8,$00,$c3,$13
 .byte $d2,$41,$1b,$94,$67,$12,$c4,$15,$53,$c1,$d2,$41,$12,$c1,$29,$13
 .byte $85,$17,$1b,$92,$1a,$42,$47,$13,$83,$41,$a7,$13,$0e,$91,$a7,$63
 .byte $b7,$63,$c5,$65,$d5,$65,$dd,$4a,$e3,$67,$f3,$67,$8d,$c1,$ae,$42
 .byte $df,$20,$ad,$c7,$fd
-L_CD08:
+L_Area0F:
 .byte $90,$11,$0f,$26,$6e,$10,$8b,$17,$af,$32,$d8,$62,$e8,$62,$fc,$3f
 .byte $ad,$c8,$f8,$64,$0c,$be,$43,$43,$f8,$64,$0c,$bf,$f8,$64,$48,$e4
 .byte $5c,$39,$83,$40,$92,$41,$b3,$40,$f8,$64,$48,$e4,$5c,$39,$f8,$64
@@ -16255,7 +16183,7 @@ L_CD08:
 .byte $ba,$62,$f8,$64,$0c,$b7,$88,$64,$bc,$31,$d4,$45,$fc,$31,$3c,$b1
 .byte $78,$64,$8c,$38,$0b,$9c,$1a,$33,$18,$61,$28,$61,$39,$60,$5d,$4a
 .byte $ee,$11,$0f,$b8,$1d,$c1,$3e,$42,$6f,$20,$3d,$c7,$fd
-L_CD85:
+L_Area10:
 .byte $52,$31,$0f,$20,$6e,$40,$f7,$20,$07,$85,$17,$20,$4f,$34,$c3,$03
 .byte $c7,$02,$d3,$22,$27,$e3,$39,$61,$e7,$73,$5c,$f4,$53,$00,$6c,$63
 .byte $47,$a0,$53,$06,$63,$22,$a7,$73,$fc,$73,$13,$a1,$33,$07,$43,$21
@@ -16263,33 +16191,33 @@ L_CD85:
 .byte $e3,$22,$26,$f4,$bc,$02,$00,$89,$09,$0c,$17,$88,$43,$24,$a7,$01
 .byte $c3,$05,$08,$f2,$97,$31,$a3,$02,$e1,$69,$f1,$69,$8d,$c1,$cf,$26
 .byte $ad,$c7,$fd
-L_CDE8:
+L_Area13:
 .byte $00,$c1,$4c,$00,$f4,$4f,$0d,$02,$02,$42,$43,$4f,$52,$c2,$de,$00
 .byte $5a,$c2,$4d,$c7,$fd
-L_CDFD:
+L_Area14:
 .byte $90,$51,$0f,$26,$ee,$10,$0b,$94,$33,$14,$42,$42,$77,$16,$86,$44
 .byte $02,$92,$4a,$16,$69,$42,$73,$14,$b0,$00,$c7,$12,$05,$c0,$1c,$17
 .byte $1f,$11,$36,$12,$8f,$14,$91,$40,$1b,$94,$35,$12,$34,$42,$60,$42
 .byte $61,$12,$87,$12,$96,$40,$a3,$14,$47,$92,$05,$c0,$39,$12,$82,$40
 .byte $98,$12,$16,$c4,$17,$14,$54,$12,$9b,$16,$28,$94,$ce,$01,$3d,$c1
 .byte $5e,$42,$8f,$20,$5d,$c7,$fd
-L_CE54:
+L_Area17:
 .byte $10,$51,$4c,$00,$c7,$12,$c6,$42,$03,$92,$02,$42,$29,$12,$63,$12
 .byte $62,$42,$69,$14,$a5,$12,$a4,$42,$e2,$14,$e1,$44,$f8,$16,$37,$c1
 .byte $8f,$38,$02,$bb,$28,$7a,$68,$7a,$a8,$7a,$e0,$6a,$f0,$6a,$6d,$c5
 .byte $fd
-L_CE85:
+L_Area1C:
 .byte $06,$c1,$4c,$00,$f4,$4f,$0d,$02,$06,$20,$24,$4f,$35,$a0,$36,$20
 .byte $53,$46,$d5,$20,$d6,$20,$34,$a1,$73,$49,$74,$20,$94,$20,$b4,$20
 .byte $d4,$20,$f4,$20,$2e,$80,$59,$42,$4d,$c7,$fd
-L_CEB0:
+L_Area1D:
 .byte $96,$31,$0f,$26,$0d,$03,$1a,$60,$77,$42,$c4,$00,$c8,$62,$b9,$e1
 .byte $d3,$07,$d7,$08,$f9,$61,$0c,$81,$4e,$b1,$8e,$b1,$aa,$30,$bc,$01
 .byte $e4,$50,$e9,$61,$0c,$81,$0d,$0a,$84,$43,$98,$72,$0d,$0c,$0f,$38
 .byte $1d,$c1,$5f,$26,$3d,$c7,$fd
-L_CEE7:
+L_Area23:
 .byte $3c,$11,$0f,$26,$ad,$40,$3d,$c7,$fd
-L_CEF0:
+L_Area24:
 .byte $48,$0f,$0e,$01,$5e,$02,$a7,$00,$bc,$73,$1a,$e0,$39,$61,$58,$62
 .byte $77,$63,$97,$63,$b8,$62,$d6,$08,$f8,$62,$19,$e1,$75,$52,$86,$40
 .byte $87,$07,$95,$52,$93,$43,$a5,$21,$c5,$52,$d6,$40,$d7,$20,$e5,$52
@@ -16301,7 +16229,7 @@ L_CEF0:
 .byte $16,$24,$66,$05,$8e,$00,$fe,$01,$08,$d2,$0e,$06,$6f,$47,$9e,$0f
 .byte $0e,$82,$2d,$47,$28,$7a,$68,$7a,$a8,$7a,$ae,$01,$de,$0f,$6d,$c5
 .byte $fd
-L_CF91:
+L_Area25:
 .byte $48,$0f,$0e,$01,$5e,$02,$bc,$01,$fc,$01,$2c,$82,$41,$52,$4e,$04
 .byte $67,$25,$68,$24,$69,$21,$89,$08,$99,$21,$ba,$42,$c7,$05,$de,$0b
 .byte $b2,$88,$fe,$02,$2c,$e1,$2c,$71,$67,$01,$77,$00,$87,$01,$8e,$00
@@ -16313,7 +16241,7 @@ L_CF91:
 .byte $fe,$04,$04,$d1,$17,$05,$26,$49,$27,$29,$df,$33,$fe,$02,$44,$f6
 .byte $7c,$01,$8e,$06,$bf,$47,$ee,$0f,$4d,$c7,$0e,$82,$68,$7a,$ae,$01
 .byte $de,$0f,$6d,$c5,$fd
-L_D036:
+L_Area26:
 .byte $48,$01,$0e,$01,$00,$5a,$3e,$06,$45,$46,$47,$46,$53,$44,$ae,$01
 .byte $df,$4a,$4d,$c7,$0e,$81,$00,$5a,$2e,$04,$37,$28,$3a,$48,$46,$47
 .byte $c7,$08,$ce,$0f,$df,$4a,$4d,$c7,$0e,$81,$00,$5a,$33,$53,$43,$51
@@ -16323,7 +16251,7 @@ L_D036:
 .byte $2e,$02,$36,$47,$37,$52,$3a,$49,$47,$25,$a7,$52,$d7,$05,$df,$4a
 .byte $4d,$c7,$0e,$81,$00,$5a,$3e,$02,$44,$51,$53,$44,$54,$44,$55,$24
 .byte $a1,$54,$ae,$01,$b4,$21,$df,$4a,$e5,$08,$4d,$c7,$fd
-L_D0C3:
+L_Area29:
 .byte $41,$01,$b8,$52,$ea,$41,$27,$b2,$b3,$42,$16,$d4,$4a,$42,$a5,$51
 .byte $a7,$31,$27,$d3,$08,$e2,$16,$64,$2c,$04,$38,$42,$76,$64,$88,$62
 .byte $de,$07,$fe,$01,$0d,$c9,$23,$32,$31,$51,$98,$52,$0d,$c9,$59,$42
