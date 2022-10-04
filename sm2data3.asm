@@ -45,7 +45,7 @@ NumberofLives       = $075a
 DigitModifier       = $0134
 WorldNumber         = $075f
 
-ANN79C              = $079C
+ANNMushroomRetainerTmp  = $079C
 
 ;sound related defines
 Squ2_NoteLenBuffer      = $0610
@@ -351,11 +351,11 @@ AwardExtraLives:
     lda #$01                   ;give 100,000 points to player for each one
     sta DigitModifier+1
 .ifdef ANN
-    jsr EndAreaPoints
-    lda AltMusicBuffer
-    bne @Exit
-    lda #1
-    sta AreaMusicQueue
+    jsr EndAreaPoints          ;
+    lda AltMusicBuffer         ; for some reason we're checking the alt music buffer?
+    bne @Exit                  ;
+    lda #1                     ; and if it's empty we queue up some music..
+    sta AreaMusicQueue         ;
 @Exit:
     rts
 .else
@@ -421,8 +421,8 @@ ELL: lda TwoBlankRows,x
      lda #$60
      sta MushroomRetDelay      ;wait before flashing each mushroom retainer in next sub
 .ifdef ANN
-      lda #$02
-      sta ANN79C
+     lda #$02
+     sta ANNMushroomRetainerTmp ; mark some value for mushroom retainers?
 .endif
      rts
     
@@ -431,11 +431,11 @@ RunMushroomRetainers:
        lda AltMusicBuffer          ;if still playing victory music, branch to leave
        bne ExRMR
 .ifdef ANN
-       lda ANN79C
-       beq @Done
-       lda #1
-       sta AreaMusicQueue
-       rts
+       lda ANNMushroomRetainerTmp  ; check temporary mushroom retainer value
+       beq @Done                   ; if zero - skip ahead
+       lda #1                      ; otherwise queue up some music
+       sta AreaMusicQueue          ; weird...
+       rts                         ; exit
 @Done:
 .endif
        lda HardWorldFlag           ;if on world D, branch elsewhere

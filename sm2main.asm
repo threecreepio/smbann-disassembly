@@ -218,7 +218,11 @@ MultiLoopPassCntr     = $06da
 FetchNewGameTimerFlag = $0757
 GameTimerExpiredFlag  = $0759
 
+.ifdef ANN
+PrimaryHardMode       = $077d
+.else
 PrimaryHardMode       = $076a
+.endif
 SecondaryHardMode     = $06cc
 WorldSelectNumber     = $076b
 CompletedWorlds       = $07fa
@@ -546,8 +550,7 @@ AltRegContentFlag     = $07ca
 
 HardWorldJumpSpringHandler = $C4FE
 HardWorldEnemyGfxHandler = $C50C
-ANN77D = $77D
-ANN77C = $77C
+ANNMushroomRetainerGfxHandler = $77C
 
 ;SUBROUTINES IN FAMICOM DISK SYSTEM BIOS
 FDSBIOS_DELAY     = $e149
@@ -711,6 +714,7 @@ GameOverMode          = 3
 .import E_C605
 .import E_C62C
 .import E_C641
+.import E_C681
 .import E_C69E
 .import E_C6C5
 .import E_C6E8
@@ -721,6 +725,8 @@ GameOverMode          = 3
 .import E_C75B
 .import E_C795
 .import E_C7C0
+.import E_C7F0
+.import E_C80C
 .import E_C812
 .import E_C82B
 .import E_C83C
@@ -855,17 +861,17 @@ Start:
             nop
             nop
             nop
+            lda WorldNumber             ;get world number and save it temporarily
+            pha
+            lda #$27
+            sta PauseSoundQueue
+            sta FDS_CTRL_REG
 .else
             lda Mirror_FDS_CTRL_REG     ;get setting previously used by FDS bios
             and #$f7                    ;and set for vertical mirroring
             sta FDS_CTRL_REG
-.endif
             lda WorldNumber             ;get world number and save it temporarily
             pha
-.ifdef ANN
-            lda #$27
-            sta PauseSoundQueue
-            sta FDS_CTRL_REG
 .endif
             ldy #ColdBootOffset         ;load default cold boot pointer
             ldx #$05
@@ -1284,108 +1290,112 @@ VictoryModeSubsForW8:
 ;-------------------------------------------------------------------------------------
 
 .ifdef ANN
+MRetainerData:
+.addr World1MushroomRetainerCHR
+.addr World2MushroomRetainerCHR
+.addr World3MushroomRetainerCHR
+.addr World4MushroomRetainerCHR
+.addr World5MushroomRetainerCHR
+.addr World6MushroomRetainerCHR
+.addr World7MushroomRetainerCHR
 
-AreaCHRDataPtr:
-.addr AreaCHR0
-.addr AreaCHR1
-.addr AreaCHR2
-.addr AreaCHR3
-.addr AreaCHR4
-.addr AreaCHR5
-.addr AreaCHR6
-
-AreaCHROffsetHi:
+; overwrites CHR CD0-CFF, 7A0-7BF and EE0-EEF
+MRetainerPPUOffsetHi:
       .byte $0C,$07,$0E
-AreaCHROffsetLo:
+MRetainerPPUOffsetLo:
       .byte $D0,$A0,$E0
-AreaCHROffsetEnd:
+MRetainerPPULen:
       .byte $30,$50,$60
 
-LoadAreaCHRData:
-      lda LevelNumber
-      cmp #$03
-      bne @End
-      ldy HardWorldFlag
-      bne @End
-      sty $06
-      lda WorldNumber
-      asl a
-      tax
-      lda AreaCHRDataPtr,x
-      sta $00
-      inx
-      lda AreaCHRDataPtr,x
-      sta $01
+; Each world has it's own mushroom retainer in All Night Nippon.
+; These are loaded in at the start of the level.
+LoadWorldMushroomRetainer:
+      @TempPtr = $00
+      @TempOffset = $06
+      lda LevelNumber                ; get current level number
+      cmp #$03                       ; check if we're in a castle
+      bne @End                       ; if not - exit out
+      ldy HardWorldFlag              ; check if we're playing hard worlds
+      bne @End                       ; if so - exit out
+      sty @TempOffset                ; clear offset value
+      lda WorldNumber                ; get current world
+      asl a                          ; multiply by 2 to get offset
+      tax                            ; and store it in X
+      lda MRetainerData,x            ; place pointer for world in $00
+      sta @TempPtr                   ;
+      inx                            ;
+      lda MRetainerData,x            ;
+      sta @TempPtr+1                 ;
 @CopyNext:
-      ldx $06
-      lda AreaCHROffsetHi,x
-      sta PPU_ADDRESS
-      lda AreaCHROffsetLo,x
-      sta PPU_ADDRESS
-:     lda ($00),y
-      sta PPU_DATA
-      iny
-      tya
-      cmp AreaCHROffsetEnd,x
-      bne :-
-      inc $06
-      lda $06
-      cmp #$03
-      bne @CopyNext
+      ldx @TempOffset                ; load current offset
+      lda MRetainerPPUOffsetHi,x     ; set PPU address from table
+      sta PPU_ADDRESS                ;
+      lda MRetainerPPUOffsetLo,x     ;
+      sta PPU_ADDRESS                ;
+:     lda (@TempPtr),y               ; get next byte to copy to CHR
+      sta PPU_DATA                   ; and write it to PPU
+      iny                            ; increment loop
+      tya                            ;
+      cmp MRetainerPPULen,x          ; check if we've reached the end of the data
+      bne :-                         ; otherwise loop
+      inc @TempOffset                ; advance to next CHR region
+      lda @TempOffset                ; check if we're reached the end
+      cmp #$03                       ;
+      bne @CopyNext                  ; no - keep looping
 @End:
-  JMP IncModeTask                                         ; 006351 4C B9 63
+      jmp IncModeTask                ; yes - move on to next task
 .endif
 
-.ifdef ANN
-VictoryDataPointers:
-.addr VictoryDataValue0
-.addr VictoryDataValue1
-.addr VictoryDataValue2
-.addr VictoryDataValue3
+.ifndef ANN
+WorldBits:
+    .byte $01, $02, $04, $08, $10, $20, $40, $80
 
-VictoryDataValues:
+SetupVictoryMode:
+.else
+MushroomRetainerPalettes:
+.addr MushroomRetainerPal0
+.addr MushroomRetainerPal1
+.addr MushroomRetainerPal2
+.addr MushroomRetainerPal3
+
+WMushroomRetainerOffsets:
 .byte $04,$02,$00,$04,$02,$00,$08
 
-VictoryDataValue0:
+MushroomRetainerPal0:
 .byte $30,$12
-VictoryDataValue1:
+MushroomRetainerPal1:
 .byte $30,$1A
-VictoryDataValue2:
+MushroomRetainerPal2:
 .byte $30,$16
-VictoryDataValue3:
+MushroomRetainerPal3:
 .byte $17,$2A
 
 ANNMushroomRetainerPalette:
 .byte $3F,$18,$04,$0F,$36
-
-VictoryDataPlaceholder:
+ANNMushroomPlaceholder:
 .byte $00,$00,$00
-.else
-WorldBits:
-    .byte $01, $02, $04, $08, $10, $20, $40, $80
-.endif
 
 SetupVictoryMode:
-.ifdef ANN
-      lda HardWorldFlag
-      bne @VictoryMode
-      ldx WorldNumber
-      cpx #$07
-      beq @VictoryMode
-      ldy VictoryDataValues,x
-      lda VictoryDataPointers,y
-      sta $00
-      iny
-      lda VictoryDataPointers,y
-      sta $01
-      ldy #0
-:     lda ($00),y
-      sta VictoryDataPlaceholder,y
-      iny
-      cpy #2
-      bne :-
-      lda #$1D
-      sta VRAM_Buffer_AddrCtrl
+      @TempPtr = $00
+      lda HardWorldFlag                 ; check if we're playing hard worlds
+      bne @VictoryMode                  ; if so - skip to 2j code
+      ldx WorldNumber                   ; get current world
+      cpx #World8                       ; are we in world 8?
+      beq @VictoryMode                  ; yes - skip to 2j code
+      ldy WMushroomRetainerOffsets,x    ; no - get palette offset based on world
+      lda MushroomRetainerPalettes,y    ; then load palette location into pointer
+      sta @TempPtr                      ; store in a temporary pointer
+      iny                               ; 
+      lda MushroomRetainerPalettes,y    ; 
+      sta @TempPtr+1                    ; 
+      ldy #0                            ; 
+:     lda (@TempPtr),y                  ; load byte from pointer
+      sta ANNMushroomPlaceholder,y      ; and write it to the palette placeholder
+      iny                               ; 
+      cpy #2                            ; check if we've reached the end
+      bne :-                            ; no - continue loop
+      lda #$1D                          ; yes - set vram buffer to mushroom palette
+      sta VRAM_Buffer_AddrCtrl          ; what a bad way to copy two bytes... oh well.
 @VictoryMode:
 .endif
          ldx ScreenRight_PageLoc ;get page location of right side of screen
@@ -1495,8 +1505,8 @@ EndCastleAward:
    ora GameTimerDisplay+1
    ora GameTimerDisplay+2
 .ifdef ANN
-   beq @Continue
-   jmp AwardTimerCastle
+   beq @Continue          ; bugfix for castle countdown, skip ahead if timer is zero
+   jmp AwardTimerCastle   ; otherwise run timer countdown
    @Continue:
 .else
    bne ExEWA
@@ -1517,7 +1527,7 @@ NextWorld: lda #$00
            sta LevelNumber
            sta OperMode_Task
 .ifdef ANN
-           inc WorldNumber
+           inc WorldNumber           ; advance to next world
 .else
            lda WorldNumber
            clc
@@ -1633,7 +1643,7 @@ SetupNumSpr:  lda FloateyNum_Y_Pos,x       ;get vertical coordinate
               sta Sprite_Tilenumber+4,y    ;display the second half
               ldx ObjectOffset             ;get enemy object offset and leave
 .ifdef ANN
-ANNDemoReset:
+ANNDoNothing:
 .endif
               rts
 
@@ -1651,7 +1661,7 @@ ScreenRoutines:
    .word ResetSpritesAndScreenTimer
    .word DisplayIntermediate
 .ifdef ANN
-   .word ANNDemoReset
+   .word ANNDoNothing
 .else
    .word DemoReset
 .endif
@@ -1905,7 +1915,7 @@ GameOver:
   .byte $22, $4b, $05, $1b, $0e, $1d, $1b, $22 ;"RETRY"
   .byte $ff
 
-.ifdef ANN
+.ifdef ANN ; Use SMB1 style Warpzones
 WarpZone:
   .byte $25, $84, $15
   .byte $20, $0e, $15, $0c, $18, $16, $0e, $24, $1d, $18 ; "WELCOME TO WARP ZONE!"
@@ -1992,20 +2002,20 @@ WZMLoop: iny
          sec
          sbc #$80              ;clear d7 of warp zone control, use as offset
 .ifdef ANN
-         asl a
-         asl a
+         asl                    ;twice to get proper warp zone number
+         asl                    ;offset
          tax
-         ldy #0
-:        lda WarpZoneNumbers,x
-         sta VRAM_Buffer1+27,y
+         ldy #$00
+:        lda WarpZoneNumbers,x  ;print warp zone numbers into the
+         sta VRAM_Buffer1+27,y  ;placeholders from earlier
          inx
+         iny                    ;put a number in every fourth space
          iny
          iny
          iny
-         iny
-         cpy #$0C
+         cpy #$0c
          bcc :-
-         lda #$2C
+         lda #$2c               ;load new buffer pointer at end of message
 .else
          tax
          lda WarpZoneNumbers,x ;replace blank tile with world number
@@ -2369,115 +2379,116 @@ MetatileGraphics_High:
   .byte >Palette0_MTiles, >Palette1_MTiles, >Palette2_MTiles, >Palette3_MTiles
 
 .ifdef ANN
+; ann metatiles are mostly copied from smb1, not completely
 Palette0_MTiles:
-.byte $24, $24, $24, $24
-.byte $27, $27, $27, $27
-.byte $24, $24, $24, $35
-.byte $36, $25, $37, $25
-.byte $24, $38, $24, $24
-.byte $24, $30, $30, $26
-.byte $26, $26, $34, $26
-.byte $24, $31, $24, $32
-.byte $33, $26, $24, $33
-.byte $34, $26, $26, $26
-.byte $26, $26, $26, $26
-.byte $24, $C0, $24, $C0
-.byte $24, $7F, $7F, $24
-.byte $B8, $BA, $B9, $BB
-.byte $B8, $BC, $B9, $BD
-.byte $BA, $BC, $BB, $BD
-.byte $60, $64, $61, $65
-.byte $62, $66, $63, $67
-.byte $60, $64, $61, $65
-.byte $62, $66, $63, $67
-.byte $68, $68, $69, $69
-.byte $26, $26, $6A, $6A
-.byte $4B, $4C, $4D, $4E
-.byte $4D, $4F, $4D, $4F
-.byte $4D, $4E, $50, $51
-.byte $6B, $70, $2C, $2D
-.byte $6C, $71, $6D, $72
-.byte $6E, $73, $6F, $74
-.byte $86, $8A, $87, $8B
-.byte $88, $8C, $88, $8C
-.byte $89, $8D, $69, $69
-.byte $8E, $91, $8F, $92
-.byte $26, $93, $26, $93
-.byte $90, $94, $69, $69
-.byte $A4, $E9, $EA, $EB
-.byte $24, $24, $24, $24
-.byte $24, $2F, $24, $3D
-.byte $A2, $A2, $A3, $A3
-.byte $24, $24, $24, $24
+  .byte $24, $24, $24, $24 ;blank
+  .byte $27, $27, $27, $27 ;black metatile
+  .byte $24, $24, $24, $35 ;bush left
+  .byte $36, $25, $37, $25 ;bush middle
+  .byte $24, $38, $24, $24 ;bush right
+  .byte $24, $30, $30, $26 ;mountain left
+  .byte $26, $26, $34, $26 ;mountain left bottom/middle center
+  .byte $24, $31, $24, $32 ;mountain middle top
+  .byte $33, $26, $24, $33 ;mountain right
+  .byte $34, $26, $26, $26 ;mountain right bottom
+  .byte $26, $26, $26, $26 ;mountain middle bottom
+  .byte $24, $c0, $24, $c0 ;bridge guardrail
+  .byte $24, $7f, $7f, $24 ;chain
+  .byte $b8, $ba, $b9, $bb ;tall tree top, top half
+  .byte $b8, $bc, $b9, $bd ;short tree top
+  .byte $ba, $bc, $bb, $bd ;tall tree top, bottom half
+  .byte $60, $64, $61, $65 ;warp pipe end left, points up
+  .byte $62, $66, $63, $67 ;warp pipe end right, points up
+  .byte $60, $64, $61, $65 ;decoration pipe end left, points up
+  .byte $62, $66, $63, $67 ;decoration pipe end right, points up
+  .byte $68, $68, $69, $69 ;pipe shaft left
+  .byte $26, $26, $6a, $6a ;pipe shaft right
+  .byte $4b, $4c, $4d, $4e ;tree ledge left edge
+  .byte $4d, $4f, $4d, $4f ;tree ledge middle
+  .byte $4d, $4e, $50, $51 ;tree ledge right edge
+  .byte $6b, $70, $2c, $2d ;mushroom left edge
+  .byte $6c, $71, $6d, $72 ;mushroom middle
+  .byte $6e, $73, $6f, $74 ;mushroom right edge
+  .byte $86, $8a, $87, $8b ;sideways pipe end top
+  .byte $88, $8c, $88, $8c ;sideways pipe shaft top
+  .byte $89, $8d, $69, $69 ;sideways pipe joint top
+  .byte $8e, $91, $8f, $92 ;sideways pipe end bottom
+  .byte $26, $93, $26, $93 ;sideways pipe shaft bottom
+  .byte $90, $94, $69, $69 ;sideways pipe joint bottom
+  .byte $a4, $e9, $ea, $eb ;seaplant
+  .byte $24, $24, $24, $24 ;blank, used on bricks or blocks that are hit
+  .byte $24, $2f, $24, $3d ;flagpole ball
+  .byte $a2, $a2, $a3, $a3 ;flagpole shaft
+  .byte $24, $24, $24, $24 ;blank, used in conjunction with vines
 
 Palette1_MTiles:
-.byte $A2, $A2, $A3, $A3
-.byte $99, $24, $99, $24
-.byte $24, $A2, $3E, $3F
-.byte $5B, $5C, $24, $A3
-.byte $24, $24, $24, $24
-.byte $9D, $47, $9E, $47
-.byte $47, $47, $27, $27
-.byte $47, $47, $47, $47
-.byte $27, $27, $47, $47
-.byte $A9, $47, $AA, $47
-.byte $9B, $27, $9C, $27
-.byte $27, $27, $27, $27
-.byte $52, $52, $52, $52
-.byte $80, $A0, $81, $A1
-.byte $BE, $BE, $BF, $BF
-.byte $75, $BA, $76, $BB
-.byte $BA, $BA, $BB, $BB
-.byte $45, $47, $45, $47
-.byte $47, $47, $47, $47
-.byte $45, $47, $45, $47
-.byte $45, $47, $45, $47
-.byte $45, $47, $45, $47
-.byte $45, $47, $45, $47
-.byte $45, $47, $45, $47
-.byte $45, $47, $45, $47
-.byte $47, $47, $47, $47
-.byte $47, $47, $47, $47
-.byte $47, $47, $47, $47
-.byte $47, $47, $47, $47
-.byte $47, $47, $47, $47
-.byte $24, $24, $24, $24
-.byte $24, $24, $24, $24
-.byte $24, $24, $24, $24
-.byte $AB, $AC, $AD, $AE
-.byte $5D, $5E, $5D, $5E
-.byte $C1, $24, $C1, $24
-.byte $C6, $C8, $C7, $C9
-.byte $CA, $CC, $CB, $CD
-.byte $2A, $2A, $40, $40
-.byte $24, $24, $24, $24
-.byte $24, $47, $24, $47
-.byte $82, $83, $84, $85
-.byte $B4, $B6, $B5, $B7
-.byte $24, $47, $24, $47
-.byte $86, $8A, $87, $8B
-.byte $8E, $91, $8F, $92
-.byte $24, $2F, $24, $3D
+  .byte $a2, $a2, $a3, $a3 ;vertical rope
+  .byte $99, $24, $99, $24 ;horizontal rope
+  .byte $24, $a2, $3e, $3f ;left pulley
+  .byte $5b, $5c, $24, $a3 ;right pulley
+  .byte $24, $24, $24, $24 ;blank used for balance rope
+  .byte $9d, $47, $9e, $47 ;castle top
+  .byte $47, $47, $27, $27 ;castle window left
+  .byte $47, $47, $47, $47 ;castle brick wall
+  .byte $27, $27, $47, $47 ;castle window right
+  .byte $a9, $47, $aa, $47 ;castle top w/ brick
+  .byte $9b, $27, $9c, $27 ;entrance top
+  .byte $27, $27, $27, $27 ;entrance bottom
+  .byte $52, $52, $52, $52 ;green ledge stump
+  .byte $80, $a0, $81, $a1 ;fence
+  .byte $be, $be, $bf, $bf ;tree trunk
+  .byte $75, $ba, $76, $bb ;mushroom stump top
+  .byte $ba, $ba, $bb, $bb ;mushroom stump bottom
+  .byte $45, $47, $45, $47 ;breakable brick w/ line 
+  .byte $47, $47, $47, $47 ;breakable brick 
+  .byte $45, $47, $45, $47 ;breakable brick (not used)
+  .byte $45, $47, $45, $47 ;brick with line (power-up)
+  .byte $45, $47, $45, $47 ;brick with line (vine)
+  .byte $45, $47, $45, $47 ;brick with line (star)
+  .byte $45, $47, $45, $47 ;brick with line (coins)
+  .byte $45, $47, $45, $47 ;brick with line (1-up)
+  .byte $47, $47, $47, $47 ;brick (power-up)
+  .byte $47, $47, $47, $47 ;brick (vine)
+  .byte $47, $47, $47, $47 ;brick (star)
+  .byte $47, $47, $47, $47 ;brick (coins)
+  .byte $47, $47, $47, $47 ;brick (1-up)
+  .byte $24, $24, $24, $24 ;hidden block (1 coin)
+  .byte $24, $24, $24, $24 ;hidden block (1-up)
+  .byte $24, $24, $24, $24 ;hidden block (power-up)
+  .byte $ab, $ac, $ad, $ae ;solid block (3-d block)
+  .byte $5d, $5e, $5d, $5e ;solid block (white wall)
+  .byte $c1, $24, $c1, $24 ;bridge
+  .byte $c6, $c8, $c7, $c9 ;bullet bill cannon barrel
+  .byte $ca, $cc, $cb, $cd ;bullet bill cannon top
+  .byte $2a, $2a, $40, $40 ;bullet bill cannon bottom
+  .byte $24, $24, $24, $24 ;blank used for jumpspring
+  .byte $24, $47, $24, $47 ;half brick used for jumpspring
+  .byte $82, $83, $84, $85 ;solid block (water level, green rock)
+  .byte $b4, $b6, $b5, $b7 ;cracked rock terrain
+  .byte $24, $47, $24, $47 ;half brick (not used)
+  .byte $86, $8a, $87, $8b ;water pipe top
+  .byte $8e, $91, $8f, $92 ;water pipe bottom
+  .byte $24, $2f, $24, $3d ;flag ball (residual object)
 
 Palette2_MTiles:
-.byte $24, $24, $24, $35
-.byte $36, $25, $37, $25
-.byte $24, $38, $24, $24
-.byte $24, $24, $39, $24
-.byte $3A, $24, $3B, $24
-.byte $3C, $24, $24, $24
-.byte $41, $26, $41, $26
-.byte $26, $26, $26, $26
-.byte $B0, $B1, $B2, $B3
-.byte $77, $79, $77, $79
+  .byte $24, $24, $24, $35 ;cloud left
+  .byte $36, $25, $37, $25 ;cloud middle
+  .byte $24, $38, $24, $24 ;cloud right
+  .byte $24, $24, $39, $24 ;cloud bottom left
+  .byte $3a, $24, $3b, $24 ;cloud bottom middle
+  .byte $3c, $24, $24, $24 ;cloud bottom right
+  .byte $41, $26, $41, $26 ;water/lava top
+  .byte $26, $26, $26, $26 ;water/lava
+  .byte $b0, $b1, $b2, $b3 ;cloud level terrain
+  .byte $77, $79, $77, $79 ;bowser's bridge
 
 Palette3_MTiles:
-.byte $53, $55, $54, $56
-.byte $53, $55, $54, $56
-.byte $A5, $A7, $A6, $A8
-.byte $C2, $C4, $C3, $C5
-.byte $57, $59, $58, $5A
-.byte $7B, $7D, $7C, $7E
+  .byte $53, $55, $54, $56 ;question block (coin)
+  .byte $53, $55, $54, $56 ;question block (power-up)
+  .byte $a5, $a7, $a6, $a8 ;coin
+  .byte $c2, $c4, $c3, $c5 ;underwater coin
+  .byte $57, $59, $58, $5a ;empty block
+  .byte $7b, $7d, $7c, $7e ;axe
 .else
 
 Palette0_MTiles:
@@ -3275,7 +3286,7 @@ RunGameOver:
        lda #$00
        sta DisableScreenFlag
 .ifdef ANN
-      jmp GameOverMenu
+       jmp GameOverMenu
 .else
        lda WorldNumber       ;if on world 9, branch on to end the game
        cmp #World9
@@ -4862,7 +4873,7 @@ GameModeSubs:
       .word GameModeDiskRoutines
       .word InitializeArea
 .ifdef ANN
-      .word LoadAreaCHRData
+      .word LoadWorldMushroomRetainer
 .endif
       .word ScreenRoutines
       .word SecondaryGameSetup
@@ -7498,16 +7509,16 @@ ExitELCore: rts
 
 .ifdef ANN
 LoopCmdWorldNumber:
-  .byte $03,$03,$06,$06,$06,$06,$06,$06,$07,$07
+  .byte $03, $03, $06, $06, $06, $06, $06, $06, $07, $07
 
 LoopCmdPageNumber:
-  .byte $05,$09,$04,$05,$06,$08,$09,$0A,$05,$0B
+  .byte $05, $09, $04, $05, $06, $08, $09, $0A, $05, $0B
 
 LoopCmdYPosition:
-  .byte $B0,$40,$40,$40,$40,$40,$80,$80,$F0,$B0
+  .byte $B0, $40, $40, $40, $40, $40, $80, $80, $F0, $B0
 
 MultiLoopCount:
-  .byte $01,$01,$03,$03,$03,$03,$03,$03,$01,$01
+  .byte $01, $01, $03, $03, $03, $03, $03, $03, $01, $01
 
 .else
 LoopCmdWorldNumber:
@@ -7716,14 +7727,11 @@ CheckForEnemyGroup:
 BuzzyBeetleMutate:
         cmp #Goomba          ;if below $37, check for goomba
         bne StrID            ;value ($3f or more always fails)
-.ifdef ANN
-        ldy $077D
-        beq StrID
-        ldy HardWorldFlag
-        bne StrID
-.else
         ldy PrimaryHardMode  ;check if primary hard mode flag is set
         beq StrID            ;and if so, change goomba to buzzy beetle
+.ifdef ANN
+        ldy HardWorldFlag
+        bne StrID
 .endif
         lda #BuzzyBeetle
 StrID:  sta Enemy_ID,x       ;store enemy object number into buffer
@@ -7892,11 +7900,7 @@ NormalXSpdData:
 
 InitNormalEnemy:
          ldy #$01              ;load offset of 1 by default
-.ifdef ANN
-         lda ANN77D   ;check for primary hard mode flag set
-.else
          lda PrimaryHardMode   ;check for primary hard mode flag set
-.endif
          bne GetESpd
          dey                   ;if not set, decrement offset
 GetESpd: lda NormalXSpdData,y  ;get appropriate horizontal speed
@@ -8500,15 +8504,13 @@ HandleGroupEnemies:
         bcs SnglID                ;if so, branch
         pha                       ;save another copy to stack
         ldy #Goomba               ;load value for goomba enemy
+        lda PrimaryHardMode       ;if primary hard mode flag not set,
+        beq PullID                ;branch, otherwise change to value
 .ifdef ANN
-        lda ANN77D
-        beq PullID
         lda HardWorldFlag
         bne PullID
         ldy #BuzzyBeetle
 .else
-        lda PrimaryHardMode       ;if primary hard mode flag not set,
-        beq PullID                ;branch, otherwise change to value
         ldy #BuzzyBeetle          ;for buzzy beetle
 .endif
 PullID: pla                       ;get second copy from stack
@@ -9125,14 +9127,11 @@ ReviveStunned:
          iny
          sty Enemy_MovingDir,x     ;store as pseudorandom movement direction
          dey                       ;decrement for use as pointer
-.ifdef ANN
-         lda ANN77D
-         beq SetRSpd               ;if not set, use pointer as-is
-         lda HardWorldFlag
-         bne SetRSpd               ;if hard world flag set, use pointer as-is
-.else
          lda PrimaryHardMode       ;check primary hard mode flag
          beq SetRSpd               ;if not set, use pointer as-is
+.ifdef ANN
+         lda HardWorldFlag
+         bne SetRSpd               ;if hard world flag set, use pointer as-is
 .endif
          iny
          iny                       ;otherwise increment 2 bytes to next data
@@ -11319,11 +11318,7 @@ HandleStompedShellE:
        adc StompTimer
        jsr SetupFloateyNumber     ;award points accordingly
        inc StompTimer             ;increment stomp timer of some sort
-.ifdef ANN
-       ldy ANN77D
-.else
        ldy PrimaryHardMode        ;check primary hard mode flag
-.endif
        lda RevivalRateData,y      ;load timer setting according to flag
        sta EnemyIntervalTimer,x   ;set as enemy timer to revive stomped enemy
 SetBounce:
@@ -13838,7 +13833,7 @@ CheckToAnimateEnemy:
       cmp #World8
       bcs CheckDefeatedState   ;if so, leave the offset alone (use princess)
 .ifdef ANN
-      inc ANN77C
+      inc ANNMushroomRetainerGfxHandler
 .endif
       ldx #$a2                 ;otherwise, set for mushroom retainer object instead
       bne CheckDefeatedState   ;unconditional branch
@@ -13889,7 +13884,7 @@ SkipToOffScrChk:
 
 CheckForVerticalFlip:
 .ifdef ANN
-      lda ANN77C
+      lda ANNMushroomRetainerGfxHandler
       bne SkipToOffScrChk
 .endif
       lda VerticalFlipFlag       ;check if vertical flip flag is set here
@@ -15221,7 +15216,7 @@ AddBeatenGame:
 SetS2S: sta GamesBeatenCount
 .ifdef ANN
         lda #$01
-        sta ANN77D
+        sta PrimaryHardMode
 .endif
         jsr InitializeNameTables
         jsr ResetDiskIOTask      ;end disk subroutines
@@ -15665,7 +15660,7 @@ EnemyDataAddrs:
 .addr E_C5D0 ; 06 (sm2data2)
 .addr E_C605 ; 07 (sm2data2)
 .addr E_C7C7 ; 08
-.addr $C681 ; 09
+.addr E_C681 ; 09 (sm2data2)
 .addr E_C7E8 ; 10
 .addr E_C69E ; 11 (sm2data2)
 .addr E_C7F8 ; 12
@@ -15679,18 +15674,18 @@ EnemyDataAddrs:
 .addr E_C89C ; 20
 .addr E_C72F ; 21 (sm2data2)
 .addr E_C752 ; 22 (sm2data2)
-.addr $C8C0 ; 23
+.addr E_C8C0 ; 23 (sm2data2)
 .addr E_C75B ; 24 (sm2data2)
 .addr E_C795 ; 25 (sm2data2)
 .addr E_C7C0 ; 26 (sm2data2)
-.addr $C7F0 ; 27
+.addr E_C7F0 ; 27 (sm2data2)
 .addr E_C8C1 ; 28
 .addr E_C8C7 ; 29
 .addr E_C6C5 ; 30 (sm2data2)
 .addr E_C6E8 ; 31 (sm2data2)
 .addr E_C26F ; 32
 .addr E_C729 ; 33 (sm2data2)
-.addr $C80C ; 34
+.addr E_C80C ; 34 (sm2data2)
 .addr E_C8EB ; 35 (sm2data2)
 .addr E_C8EC ; 36
 .addr E_C919 ; 37
@@ -16155,7 +16150,9 @@ E_C896:
 E_C89C:
 .byte $c7,$83,$d7,$03,$42,$8f,$7a,$03,$05,$a4,$78,$24,$a6,$25,$e4,$25
 .byte $4b,$83,$e3,$03,$06,$a9,$89,$29,$b6,$29,$09,$a9,$66,$29,$c9,$29
-.byte $0f,$08,$85,$25,$ff
+.byte $0f,$08,$85,$25
+E_C8C0:
+.byte $ff
 E_C8C1:
 .byte $0a,$aa,$0e,$24,$4a,$ff
 E_C8C7:
@@ -16336,46 +16333,70 @@ L_D0C3:
 .byte $c7,$34,$d1,$51,$43,$b3,$47,$33,$9a,$30,$a9,$61,$b8,$62,$be,$0b
 .byte $c4,$31,$d5,$0a,$de,$0f,$0d,$ca,$7d,$47,$fd
 
-AreaCHR0:
-.byte $00,$03,$1f,$3f,$3f,$7f,$7f,$7f,$00,$03,$1f,$3f,$3f,$7f,$7f,$7f
+World1MushroomRetainerCHR:
+.byte $00,$03,$1f,$3f,$3f,$7f,$7f,$7f
+.byte $00,$03,$1f,$3f,$3f,$7f,$7f,$7f
 .byte $7f
 
-AreaCHR4:
-.byte $3f,$3b,$33,$7f,$7e,$7f,$7f,$5f,$18,$0f,$3f,$70,$53,$19,$1c
-.byte $00,$00,$03,$34,$79,$7f,$3f,$1c,$3f,$3f,$0f,$0f,$07,$03,$03,$00
-.byte $e0,$f0,$f8,$f8,$fc,$fe,$fe,$fe,$e0,$f0,$f8,$f8,$fc,$fe,$fe,$fe
-.byte $fe,$fe,$ee,$e6,$ff,$3f,$ff,$ff,$8c,$04,$70,$7e,$07,$e5,$cc,$1c
-.byte $80,$00,$e0,$06,$cf,$ff,$fe,$1c,$7e,$fe,$f8,$f8,$f0,$e0,$e0,$00
+World5MushroomRetainerCHR:
+.byte $3f,$3b,$33,$7f,$7e,$7f,$7f,$5f
+.byte $18,$0f,$3f,$70,$53,$19,$1c,$00
+.byte $00,$03,$34,$79,$7f,$3f,$1c,$3f
+.byte $3f,$0f,$0f,$07,$03,$03,$00,$e0
+.byte $f0,$f8,$f8,$fc,$fe,$fe,$fe,$e0
+.byte $f0,$f8,$f8,$fc,$fe,$fe,$fe,$fe
+.byte $fe,$ee,$e6,$ff,$3f,$ff,$ff,$8c
+.byte $04,$70,$7e,$07,$e5,$cc,$1c,$80
+.byte $00,$e0,$06,$cf,$ff,$fe,$1c,$7e
+.byte $fe,$f8,$f8,$f0,$e0,$e0,$00
 
-AreaCHR1:
-.byte $1f,$3f,$3f,$1f,$1f,$1f,$1f,$1f,$1f,$3f,$30,$04,$03,$02,$00,$00
+World2MushroomRetainerCHR:
+.byte $1f,$3f,$3f,$1f,$1f,$1f,$1f,$1f
+.byte $1f,$3f,$30,$04,$03,$02,$00,$00
 .byte $1f
 
-AreaCHR5:
-.byte $1f,$1f,$1f,$1e,$0f,$0f,$07,$00,$01,$00,$01,$00,$01,$00,$00
-.byte $74,$42,$e3,$e1,$00,$60,$38,$0c,$0e,$03,$03,$01,$0f,$e8,$78,$3c
-.byte $00,$f8,$fc,$fc,$fc,$fc,$fc,$fc,$00,$f8,$1c,$4c,$8c,$84,$04,$04
-.byte $f8,$f8,$f8,$f8,$f8,$f0,$f0,$e0,$00,$00,$00,$00,$00,$00,$00,$00
-.byte $2e,$62,$c7,$c7,$00,$18,$0c,$06,$70,$e0,$c0,$c0,$c0,$dc,$fe,$07
+World6MushroomRetainerCHR:
+.byte $1f,$1f,$1f,$1e,$0f,$0f,$07,$00
+.byte $01,$00,$01,$00,$01,$00,$00,$74
+.byte $42,$e3,$e1,$00,$60,$38,$0c,$0e
+.byte $03,$03,$01,$0f,$e8,$78,$3c,$00
+.byte $f8,$fc,$fc,$fc,$fc,$fc,$fc,$00
+.byte $f8,$1c,$4c,$8c,$84,$04,$04,$f8
+.byte $f8,$f8,$f8,$f8,$f0,$f0,$e0,$00
+.byte $00,$00,$00,$00,$00,$00,$00,$2e
+.byte $62,$c7,$c7,$00,$18,$0c,$06,$70
+.byte $e0,$c0,$c0,$c0,$dc,$fe,$07
 
-AreaCHR2:
-.byte $00,$0e,$3f,$7f,$7f,$ff,$ff,$ff,$00,$0e,$3f,$7f,$7e,$fc,$f0,$ec
+World3MushroomRetainerCHR:
+.byte $00,$0e,$3f,$7f,$7f,$ff,$ff,$ff
+.byte $00,$0e,$3f,$7f,$7e,$fc,$f0,$ec
 .byte $7f
 
-AreaCHR6:
-.byte $7f,$7f,$7f,$3c,$1f,$47,$c1,$50,$4e,$00,$00,$0f,$00,$00,$00
-.byte $e1,$35,$06,$07,$63,$70,$30,$10,$02,$0f,$0f,$07,$e3,$f7,$fc,$70
-.byte $00,$70,$fc,$fe,$fe,$ff,$ff,$ff,$00,$70,$fc,$fe,$7e,$3f,$0f,$37
-.byte $fe,$fe,$fe,$fe,$3c,$f8,$e2,$83,$0a,$72,$00,$00,$f0,$00,$00,$00
-.byte $87,$ac,$60,$e0,$60,$0e,$0c,$08,$40,$f0,$f0,$e0,$c7,$ef,$3f,$0e
+World7MushroomRetainerCHR:
+.byte $7f,$7f,$7f,$3c,$1f,$47,$c1,$50
+.byte $4e,$00,$00,$0f,$00,$00,$00,$e1
+.byte $35,$06,$07,$63,$70,$30,$10,$02
+.byte $0f,$0f,$07,$e3,$f7,$fc,$70,$00
+.byte $70,$fc,$fe,$fe,$ff,$ff,$ff,$00
+.byte $70,$fc,$fe,$7e,$3f,$0f,$37,$fe
+.byte $fe,$fe,$fe,$3c,$f8,$e2,$83,$0a
+.byte $72,$00,$00,$f0,$00,$00,$00,$87
+.byte $ac,$60,$e0,$60,$0e,$0c,$08,$40
+.byte $f0,$f0,$e0,$c7,$ef,$3f,$0e
 
-AreaCHR3:
-.byte $0f,$3f,$7f,$7f,$ff,$ff,$ff,$ff,$0f,$3f,$7f,$7f,$fe,$fc,$ee,$e0
-.byte $e1,$f1,$7f,$1f,$0c,$66,$73,$21,$c4,$00,$00,$00,$01,$00,$00,$00
-.byte $3d,$06,$07,$0e,$1c,$18,$00,$00,$07,$07,$03,$00,$58,$78,$70,$31
-.byte $f0,$fc,$fe,$fe,$fe,$ff,$ff,$ff,$f0,$fc,$fe,$fe,$7e,$7f,$3f,$07
-.byte $87,$8f,$fe,$f8,$30,$64,$c6,$86,$21,$00,$00,$00,$80,$00,$00,$00
-.byte $bc,$60,$c0,$c0,$c0,$c0,$c0,$00,$e0,$e0,$c0,$00,$00,$c0,$c0,$f0
+World4MushroomRetainerCHR:
+.byte $0f,$3f,$7f,$7f,$ff,$ff,$ff,$ff
+.byte $0f,$3f,$7f,$7f,$fe,$fc,$ee,$e0
+.byte $e1,$f1,$7f,$1f,$0c,$66,$73,$21
+.byte $c4,$00,$00,$00,$01,$00,$00,$00
+.byte $3d,$06,$07,$0e,$1c,$18,$00,$00
+.byte $07,$07,$03,$00,$58,$78,$70,$31
+.byte $f0,$fc,$fe,$fe,$fe,$ff,$ff,$ff
+.byte $f0,$fc,$fe,$fe,$7e,$7f,$3f,$07
+.byte $87,$8f,$fe,$f8,$30,$64,$c6,$86
+.byte $21,$00,$00,$00,$80,$00,$00,$00
+.byte $bc,$60,$c0,$c0,$c0,$c0,$c0,$00
+.byte $e0,$e0,$c0,$00,$00,$c0,$c0,$f0
 
 ;; unused bytes
 .byte $ff,$ff,$ff,$ff,$ff,$ff,$ff,$ff,$ff,$ff,$ff,$ff,$ff,$ff,$ff,$ff

@@ -47,6 +47,7 @@ MetatileBuffer        = $06a1
 .export E_C605
 .export E_C62C
 .export E_C641
+.export E_C681
 .export E_C69E
 .export E_C6C5
 .export E_C6E8
@@ -57,6 +58,8 @@ MetatileBuffer        = $06a1
 .export E_C75B
 .export E_C795
 .export E_C7C0
+.export E_C7F0
+.export E_C80C
 .export E_C812
 .export E_C82B
 .export E_C83C
@@ -391,6 +394,8 @@ E_C641:
 .byte $65,$E7,$0F,$08,$9B,$07,$0E,$82,$E0,$39,$0E,$87,$10,$BD,$28,$59
 .byte $9F,$0F,$0F,$34,$0F,$77,$10,$9E,$65,$F1,$0F,$12,$0E,$65,$E3,$78
 .byte $2D,$0F,$15,$3B,$29,$57,$82,$0F,$18,$55,$1D,$78,$2D,$90,$B5,$FF
+
+E_C681:
 .byte $EB,$8E,$0F,$03,$FB,$05,$17,$85,$DB,$8E,$0F,$07,$57,$05,$7B,$05
 .byte $9B,$80,$2B,$85,$FB,$05,$0F,$0B,$1B,$05,$9B,$05,$FF
 
@@ -439,8 +444,12 @@ E_C7C0:
 .byte $29,$8E,$52,$11,$83,$0E,$0F,$03,$3B,$0E,$9B,$0E,$2B,$8E,$5B,$0E
 .byte $CB,$8E,$FB,$0E,$FB,$82,$9B,$82,$BB,$02,$FE,$43,$E6,$BB,$8E,$0F
 .byte $0A,$AB,$0E,$CB,$0E,$F9,$0E,$88,$86,$A6,$06,$DB,$02,$B6,$8E,$FF
+
+E_C7F0:
 .byte $AB,$CE,$DE,$43,$C0,$CB,$CE,$5B,$8E,$1B,$CE,$4B,$85,$67,$45,$0F
 .byte $07,$2B,$00,$7B,$85,$97,$05,$0F,$0A,$92,$02,$FF
+
+E_C80C:
 .byte $0A,$AA,$1E,$23,$AA,$FF
 
 E_C812:
