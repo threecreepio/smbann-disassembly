@@ -450,7 +450,7 @@ WOn: sta WindFlag
 .endif
 
 .ifdef ANN
-AnnSomething:
+HardWorldJumpSpringHandler:
   ldy WorldNumber
   cpy #$01
   beq @Shift
@@ -461,7 +461,7 @@ AnnSomething:
 @Done:
   rts
 
-AnnSomethingAgain:
+HardWorldEnemyGfxHandler:
   ldy WorldNumber
   cpy #$01
   beq @Shift

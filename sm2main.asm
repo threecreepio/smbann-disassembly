@@ -548,8 +548,6 @@ PauseModeFlag         = $07c6
 GroundMusicHeaderOfs  = $07c7
 AltRegContentFlag     = $07ca
 
-HardWorldJumpSpringHandler = $C4FE
-HardWorldEnemyGfxHandler = $C50C
 ANNMushroomRetainerGfxHandler = $77C
 
 ;SUBROUTINES IN FAMICOM DISK SYSTEM BIOS
@@ -692,6 +690,8 @@ GameOverMode          = 3
 ;LABELS FROM SM2DATA3
 .ifdef ANN
 .import ANNEndingPalette
+.import HardWorldJumpSpringHandler
+.import HardWorldEnemyGfxHandler
 .endif
 .import WriteNameToVictoryMsg
 .import UnusedAttribData
@@ -13584,7 +13584,7 @@ JumpspringFrameOffsets:
 EnemyGfxHandler:
 .ifdef ANN
        lda #$00
-       sta $077C
+       sta ANNMushroomRetainerGfxHandler
        lda #$02
        ldy HardWorldFlag
        beq RedJS

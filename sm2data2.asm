@@ -88,6 +88,8 @@ MetatileBuffer        = $06a1
 .export MRetainerCHRWorld5
 .export MRetainerCHRWorld6
 .export MRetainerCHRWorld7
+.export HardWorldJumpSpringHandler
+.export HardWorldEnemyGfxHandler
 .else
 .export E_CastleArea5
 .export E_CastleArea6
@@ -226,7 +228,7 @@ ExMoveUDPP:
 ;-------------------------------------------------------------------------------------
 
 .ifdef ANN
-AnnSomething:
+HardWorldJumpSpringHandler:
   ldy WorldNumber
   cpy #$01
   beq @Shift
@@ -237,7 +239,7 @@ AnnSomething:
 @Done:
   rts
 
-AnnSomethingAgain:
+HardWorldEnemyGfxHandler:
   ldy WorldNumber
   cpy #$01
   beq @Shift
